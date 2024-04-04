@@ -21,6 +21,22 @@ const headTags = Astro.props;
 <!doctype html>
 <html lang='en'>
   <head>
+    <link rel='preconnect' href='https://fonts.googleapis.com' />
+    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin />
+    <link
+      as='font'
+      crossorigin=''
+      rel='preload'
+      href='https://fonts.gstatic.com/s/nunito/v26/XRXX3I6Li01BKofIMNaNRs7nczIHNHI.woff2'
+      type='font/woff2'
+    />
+    <link
+      as='font'
+      crossorigin=''
+      rel='preload'
+      href='https://fonts.gstatic.com/s/bowlbyonesc/v25/DtVlJxerQqQm37tzN3wMug9P_gH2oipOnuCABQ.woff2'
+      type='font/woff2'
+    />
     <AstroFont
       config={[
         {
@@ -28,7 +44,7 @@ const headTags = Astro.props;
           name: 'Nunito',
           googleFontsURL:
             'https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap',
-          preload: true,
+          preload: false,
           display: 'swap',
           cssVariable: 'font-sans',
           fallback: 'sans-serif',
@@ -38,7 +54,7 @@ const headTags = Astro.props;
           name: 'Bowlby One SC',
           googleFontsURL:
             'https://fonts.googleapis.com/css2?family=Bowlby+One+SC&display=swap',
-          preload: true,
+          preload: false,
           display: 'swap',
           cssVariable: 'font-headline',
           fallback: 'sans-serif',
@@ -82,7 +98,7 @@ const headTags = Astro.props;
 
   <SpeedInsights />
   <body
-    class='grid min-h-screen min-w-screen gap-10 px-6 md:px-10 py-8 text-sm md:gap-20 md:py-16 overflow-x-hidden'
+    class='grid min-h-screen min-w-screen gap-10 px-6 md:px-10 pb-8 text-sm md:gap-20 md:pb-16 overflow-x-hidden'
   >
     <Header transition:persist />
     <BlurCircle position='top' transition:persist />
