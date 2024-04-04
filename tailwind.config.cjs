@@ -37,8 +37,8 @@ module.exports = {
         '10s': '10s',
       },
       fontFamily: {
-        headline: ['Porcine', ...defaultTheme.fontFamily.sans],
-        sans: ['Nacelle', ...defaultTheme.fontFamily.sans],
+        headline: ['Bowlby One SC', ...defaultTheme.fontFamily.sans],
+        sans: ['Nunito', ...defaultTheme.fontFamily.sans],
       },
       colors: {
         border: 'hsl(var(--border))',

@@ -18,10 +18,7 @@ import react from '@astrojs/react';
 // https://expressive-code.com/key-features/syntax-highlighting/
 export default defineConfig({
   integrations: [
-    react({
-      include: ['**/components/*.tsx'],
-      experimentalReactChildren: true,
-    }),
+    react(),
     tailwind({
       applyBaseStyles: false,
     }),
