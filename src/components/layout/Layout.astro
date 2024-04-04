@@ -8,8 +8,8 @@ import NeonTriangle from '@/components/ui/shapes/NeonTriangle.astro';
 import NeonMarble from '@/components/ui/shapes/NeonMarble.astro';
 import SpeedInsights from '@vercel/speed-insights/astro';
 import { Tooltips } from 'astro-tooltips';
+import { AstroFont } from 'astro-font';
 
-import '@fontsource/open-sans';
 import '@/styles/tailwind.css';
 import { ViewTransitions } from 'astro:transitions';
 
@@ -21,74 +21,75 @@ const headTags = Astro.props;
 <!doctype html>
 <html lang='en'>
   <head>
+    <AstroFont
+      config={[
+        {
+          src: [],
+          name: 'Nunito',
+          googleFontsURL:
+            'https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap',
+          preload: true,
+          display: 'swap',
+          cssVariable: 'font-sans',
+          fallback: 'sans-serif',
+        },
+        {
+          src: [],
+          name: 'Bowlby One SC',
+          googleFontsURL:
+            'https://fonts.googleapis.com/css2?family=Bowlby+One+SC&display=swap',
+          preload: true,
+          display: 'swap',
+          cssVariable: 'font-headline',
+          fallback: 'sans-serif',
+        },
+      ]}
+    />
+
     <ViewTransitions />
     <SEOTags {...headTags} />
     <Tooltips placement='top' />
     <script is:inline>
-      const theme = (() => {
-        if (
-          typeof localStorage !== 'undefined' &&
-          localStorage.getItem('theme')
-        ) {
-          return localStorage.getItem('theme');
-        }
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          return 'dark';
-        }
-        return 'light';
-      })();
-
-      if (theme === 'light') {
-        document.documentElement.classList.remove('dark');
-        document.documentElement.dataset.theme = 'github-light';
-      } else {
-        document.documentElement.classList.add('dark');
-        document.documentElement.dataset.theme = 'dracula';
+      function setTheme() {
+        const theme = (() => {
+          if (
+            typeof localStorage !== 'undefined' &&
+            localStorage.getItem('theme')
+          ) {
+            return localStorage.getItem('theme');
+          }
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark';
+          }
+          return 'light';
+        })();
+        document.documentElement.className = theme;
+        document.documentElement.dataset.theme =
+          theme === 'light' ? 'github-light' : 'dracula';
       }
 
       document.addEventListener('astro:page-load', () => {
-        localStorage.theme === 'dark'
-          ? document.documentElement.classList.add('dark')
-          : document.documentElement.classList.remove('dark');
-        document.documentElement.dataset.theme =
-          theme === 'dark' ? 'dracula' : 'github-light';
+        setTheme();
       });
 
       document.addEventListener('astro:after-swap', () => {
-        localStorage.theme === 'dark'
-          ? document.documentElement.classList.add('dark')
-          : document.documentElement.classList.remove('dark');
-        document.documentElement.dataset.theme =
-          localStorage.theme === 'dark' ? 'dracula' : 'github-light';
+        setTheme();
       });
+
+      setTheme();
     </script>
-    <SpeedInsights />
-    <style is:inline>
-      body {
-        visibility: hidden;
-        opacity: 0;
-      }
-    </style>
-    <style is:global>
-      body {
-        visibility: visible;
-        opacity: 1;
-        transition:
-          visibility 0.2s linear,
-          opacity 0.2s linear;
-      }
-    </style>
   </head>
 
+  <SpeedInsights />
   <body
-    class='grid min-h-screen min-w-screen gap-10 px-6 md:px-10 py-8 text-sm md:gap-20 md:py-16 overflow-x-hidden visible'
+    class='grid min-h-screen min-w-screen gap-10 px-6 md:px-10 py-8 text-sm md:gap-20 md:py-16 overflow-x-hidden'
   >
-    <Header />
-    <BlurCircle position='top' />
-    <BlurCircle position='bottom' />
-    <SquishyBubble />
-    <NeonTriangle />
-    <NeonMarble />
+    <Header transition:persist />
+    <BlurCircle position='top' transition:persist />
+    <BlurCircle position='bottom' transition:persist />
+    <SquishyBubble transition:persist />
+    <NeonTriangle transition:persist />
+    <NeonMarble transition:persist />
     <main role='main' class='mx-auto w-full grid gap-10 md:gap-20'>
       <slot />
     </main>

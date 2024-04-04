@@ -1,7 +1,7 @@
-import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
+import { animated, useSpring, useTrail } from '@react-spring/web';
 import { useEffect, useState } from 'react';
-import { useSpring, useTrail, animated } from 'react-spring';
-import { EC_THEMES } from '@/data/config';
+
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 /* Adapted from the brilliant https://www.joshwcomeau.com/ - it's the tiny things that cause pure delight */
 export default function ThemeToggle() {
@@ -55,15 +55,13 @@ export default function ThemeToggle() {
   }, []);
 
   useEffect(() => {
-    if (isDark) {
-      document?.documentElement?.classList.add('dark');
-      document.documentElement.dataset.theme = EC_THEMES.dark;
-    } else {
-      document?.documentElement?.classList.remove('dark');
-      document.documentElement.dataset.theme = EC_THEMES.light;
-    }
+    document.documentElement.className = isDark ? 'dark' : 'light';
+    document.documentElement.dataset.theme = isDark
+      ? 'dracula'
+      : 'github-light';
+
     localStorage.setItem('theme', theme);
-  }, [theme]);
+  }, [isDark, theme]);
 
   const handleClick = () => {
     setTheme(isDark ? 'light' : 'dark');
@@ -80,10 +78,10 @@ export default function ThemeToggle() {
         aria-label={title}
         title={title}
         onClick={handleClick}
-        className='hover:text-ring text-accent-foreground transition animate-in animate-out light-icon grid place-content-center'
+        className='light-icon grid place-content-center text-accent-foreground transition animate-in animate-out hover:text-ring'
       >
         <animated.svg
-          className='relative overflow-visible hover:text-ring h-6 w-6'
+          className='relative size-6 overflow-visible hover:text-ring'
           viewBox='0 0 18 18'
           style={svgSpring}
         >

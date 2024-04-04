@@ -2,39 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: 'Porcine';
-  src: url('/fonts/Porcine-Heavy.eot');
-  src:
-    url('/fonts/Porcine-Heavy.eot?#iefix') format('embedded-opentype'),
-    url('/fonts/Porcine-Heavy.woff2') format('woff2'),
-    url('/fonts/Porcine-Heavy.woff') format('woff'),
-    url('/fonts/Porcine-Heavy.ttf') format('truetype'),
-    url('/fonts/Porcine-Heavy.svg#Porcine-Heavy') format('svg');
-  font-weight: 900;
-  font-style: normal;
-}
-@font-face {
-  font-family: Nacelle;
-  src: url('/fonts/Nacelle-Regular.otf') format('opentype');
-}
-@font-face {
-  font-family: Nacelle;
-  font-weight: bold;
-  src: url('/fonts/Nacelle-Bold.otf') format('opentype');
-}
-@font-face {
-  font-family: Nacelle;
-  font-style: italic;
-  src: url('/fonts/Nacelle-Italic.otf') format('opentype');
-}
-@font-face {
-  font-family: Nacelle;
-  font-weight: bold;
-  font-style: italic;
-  src: url('/fonts/Nacelle-BoldItalic.otf') format('opentype');
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -57,8 +24,8 @@
     --input: 240 5.9% 90%;
     --ring: 178 95% 40%;
     --radius: 0rem;
-    --font-sans: 'Nacelle';
-    --font-headline: 'Porcine';
+    --font-sans: 'Nunito';
+    --font-headline: 'Bowlby One SC';
   }
 
   .dark {
