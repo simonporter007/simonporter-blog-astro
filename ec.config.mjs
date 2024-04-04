@@ -10,7 +10,6 @@ export default defineEcConfig({
   },
   themes: ['dracula', 'github-light'],
   frames: true,
-  plugins: [pluginCollapsibleSections(), pluginLineNumbers()],
   styleOverrides: {
     editorTabBorderRadius: '0px',
     borderRadius: '0px',
