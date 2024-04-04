@@ -1,105 +1,101 @@
 ---
-import { getCollection } from "astro:content";
-import { Image } from "astro:assets"
+import { getCollection } from 'astro:content';
 
-import Layout from "@/layouts/Layout.astro";
-import SocialLinks from "@/components/SocialLinks.astro";
-import PostCard from "@/components/PostCard.astro";
-import ProjectCard from "@/components/ProjectCard.astro";
-import Link from "@/components/shared/Link.astro";
-import convertAsteriskToStrongTag from "@/utils/convertAsteriskToStrongTag";
+import Layout from '@/components/layout/Layout.astro';
+import SocialLinks from '@/components/SocialLinks.astro';
+import PostCard from '@/components/posts/PostCard.astro';
+import Link from '@/components/ui/Link.astro';
+import convertAsteriskToStrongTag from '@/utils/convertAsteriskToStrongTag';
 
-import presentation from "@/data/presentation";
-import projects from "@/data/projects";
-
-const posts = (await getCollection("posts")).sort(function (first, second) {
+const posts = (
+  await getCollection('posts', ({ data }) => {
+    return import.meta.env.PROD ? data.isDraft !== true : true;
+  })
+).sort(function (first, second) {
   return second.data.publishedAt.getTime() - first.data.publishedAt.getTime();
 });
+const { remarkPluginFrontmatter } = await posts?.[0]?.render();
+const readingTime = Math.round(remarkPluginFrontmatter?.estReadingTime);
 ---
 
 <Layout>
-  <main class="flex flex-col gap-20">
-    <article
-      class="flex flex-col gap-8 md:flex-row-reverse md:justify-end md:gap-12"
-    >
-      {
-        presentation.profile && (
-          <Image
-            src={presentation.profile}
-            class="w-1/4 self-center rounded-full"
-            alt="Your Profile"
-            width="200"
-            height="200"
-          />
-        )
-      }
-
-      <div class="flex flex-col gap-8">
-        <h1 class="text-3xl text-neutral-100">
-          {presentation.title}
-        </h1>
-
-        <h2
-          class="w-auto max-w-[60ch] leading-6"
-          set:html={convertAsteriskToStrongTag(presentation.description)}
+  <article class='py-10 md:py-20'>
+    <div class='grid gap-8 m-auto max-w-fit'>
+      <h1
+        transition:name='title'
+        class='text-5xl font-extrabold text-foreground max-w-[25ch] prose'
+      >
+        <Link
+          href={`/posts/${posts?.[0]?.slug}`}
+          label={posts?.[0]?.data?.title}
         />
-
-        <SocialLinks />
+      </h1>
+      <div class='grid gap-2'>
+        <h2
+          class='w-auto max-w-[60ch] leading-6'
+          set:html={convertAsteriskToStrongTag(posts?.[0]?.data?.description)}
+        />
+        <h3 class='text-xs text-muted-foreground uppercase'>
+          {
+            `${readingTime} min read • ${posts?.[0]?.data?.publishedAt
+              .toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })
+              .toLowerCase()}`
+          }
+        </h3>
       </div>
-    </article>
-
-    <article class="flex flex-col gap-8">
-      <header class="flex w-full flex-row justify-between gap-2">
-        <h3 class="text-lg text-neutral-100">Latest posts</h3>
-        <Link href="/posts" label="See all posts" isUnderline target="_self" />
+    </div>
+  </article>
+  <section class='grid gap-10 md:gap-20'>
+    <article class='grid gap-8 pt-8 border-t border-solid border-foreground'>
+      <header class='flex w-full flex-row justify-between gap-2'>
+        <h3 class='text-lg text-foreground'>Latest posts</h3>
       </header>
       {posts.length === 0 && <p>Soon, stay connected 👀...</p>}
 
-      <section class="flex flex-col gap-4 md:flex-row md:flex-wrap">
+      <section class='grid gap-4'>
         {
           posts.length !== 0 &&
             posts
-              .slice(0, 2)
+              .slice(0, 10)
               .map((post) => (
                 <PostCard
                   publishedAt={post.data.publishedAt}
                   title={post.data.title}
                   description={post.data.description}
                   slug={post.slug}
+                  tags={post.data.tags}
                 />
               ))
         }
       </section>
     </article>
 
-    <article class="flex flex-col gap-8">
+    <!-- TODO: Implement tools later -->
+    <!-- <article class="grid gap-8 pt-8 border-t border-solid border-foreground">
       <header class="flex w-full flex-row justify-between gap-2">
-        <h3 class="text-lg text-neutral-100">
-          Selected projects ({projects.length})
+        <h3 class="text-lg text-foreground">
+          Tools
         </h3>
       </header>
-      {projects.length === 0 && <p>Oops, I must work^^^^^</p>}
+      {projects.length === 0 && <p>Coming soon...</p>}
 
-      <section class="flex flex-col gap-4">
+      <section class="grid gap-4">
         {
           projects.length !== 0 &&
             projects.map((project) => <ProjectCard {...project} />)
         }
       </section>
-    </article>
+    </article> -->
 
-    <article class="flex flex-col gap-8">
-      <header class="flex w-full flex-row justify-between gap-2">
-        <h3 class="text-lg text-neutral-100">Get in touch</h3>
+    <article class='grid gap-8 pt-8 border-t border-solid border-foreground'>
+      <header class='flex w-full flex-row justify-between gap-2'>
+        <h3 class='text-lg text-foreground'>Get in touch</h3>
       </header>
-      <p>
-        Email me at <Link
-          href={`mailto:${presentation.mail}`}
-          label={presentation.mail}
-        /> or follow me via my social links.
-      </p>
-
       <SocialLinks />
     </article>
-  </main>
+  </section>
 </Layout>

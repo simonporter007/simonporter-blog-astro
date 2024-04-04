@@ -1,0 +1,124 @@
+---
+title: 'Slicing data with Tanstack Query'
+publishedAt: 2023-03-24
+updatedAt: 2024-04-04
+description: 'Slicing data with Tanstack Query and TypeScript. TypeScript gotchas and other considerations when using the `select` function.'
+slug: 'slicing-data-with-tanstack-query'
+tags: ['react', 'typescript', 'tanstack-query']
+isPublished: true
+---
+
+import PostFooter from '@/components/posts/PostFooter.astro';
+import InfoBox from '@/components/ui/InfoBox.astro';
+import { Code } from 'astro-expressive-code/components';
+import useGetAlien from './hooks/useGetAlien?raw';
+import useGetAlienWithGenerics from './hooks/useGetAlienWithGenerics?raw';
+import useGetAlienWithStringSelect from './hooks/useGetAlienWithStringSelect?raw';
+import useGetAlienEyeCount from './hooks/useGetAlienEyeCount?raw';
+import useGetAlienName from './hooks/useGetAlienName?raw';
+import { useGetAlien as getAlienQuery } from './hooks/useGetAlien';
+import { QueryLogger } from './components/QueryLogger';
+
+I've been working with [Tanstack Query](https://tanstack.com) for a while now and I'm a big, big, fan. I love how it works within my apps, nestled amongst my standard React code without needing a tonne of boilerplate, and how it takes care of the hard bits of caching for me.
+
+Nobody wants to roll their own solutions to these hard problems[^2hardproblems], and Tanstack Query "_just works_" for the projects I've used it on.
+
+Big props to [TkDodo](https://twitter.com/TkDodo) for his continued support!
+
+## Extracting data with custom hooks
+
+Lately, I've been looking at slicing data with the `select` feature. TkDodo explains this on his blog: [React Query Data Transformations](https://tkdodo.eu/blog/react-query-data-transformations) but I thought I'd write up my learnings and talk about how to use this with TypeScript.
+
+The select feature behaves like a redux selector. That is, it lets you take a larger piece of state, and slice it up to extract just the parts you're interested in.
+
+## Quick example
+
+Here we have an example custom hook which uses Tanstack Query's `useQuery` API to request our `Alien` data.
+
+<Code code={useGetAlien} lang='ts' title='useGetAlien.ts' />
+
+<InfoBox>
+  <p>
+    <strong>This hook is being used on this page!</strong>
+  </p>
+  <p>
+    You can see the result in the developer tools console or use React Query
+    DevTools in the lower right corner to see the query and observers.
+  </p>
+</InfoBox>
+
+You may have been expecting some _Generic Gymnastics_ in the code above, in order to type the return values and support all options with `UseQueryOptions<...>`.
+
+For the most part, the recommendation is to let TypeScript do it's thing and infer the values for you, but we do need to give it a helping hand when dealing with remote data (e.g. from an API call).
+
+There is an element of _lying_ to TS here to tell it we're returning an `Alien` from our **queryFn**, but it's the best we can do unless we plan on adding something like [Zod](https://tkdodo.eu/blog/type-safe-react-query#zod) to parse the returned data. However, we now have correctly typed data in our `useGetAlien()` hook.
+
+This makes sense, but what about the type of data returned by **select**? That doesn't return the same data, and we could have multiple select's returning different data couldn't we?
+
+## Slicing data with `select`
+
+So, let's create a custom `useGetAlienEyeCount()` hook which uses `select` to slice off just the **eyes** count from the `Alien` data.
+
+<Code
+  code={useGetAlienEyeCount}
+  lang='ts'
+  title='useGetAlienEyeCount.ts'
+  mark={[3, 9]}
+/>
+
+This is really neat!
+
+We can re-use the same state and slice off the bits we want without needing to make extra requests to other endpoints for the same data, or repeat the boilerplate of the original query just to return different data. This works especially well if we have data keyed off a single object (like `Site` or `User` with many properties).
+
+And so, we can update our custom hook accordingly.
+
+<Code
+  code={useGetAlienWithStringSelect}
+  lang='ts'
+  title='useGetAlien.ts'
+  ins={[14, 17, 18, 19, 34]}
+/>
+
+But there's a problem. We've now told TS that our **select** function returns a `number`, but what if we later add another custom hook with a **select** function that returns the **name** of the Alien? That's a `string` return instead.
+
+<Code
+  code={useGetAlienName}
+  lang='ts'
+  title='useGetAlienName.ts'
+  mark={[9, 10, 11, 12]}
+/>
+
+We could then start using union types `number | string` but that's going to become messy and less and less accurate, until eventually we might start reaching for the dreaded `any`...
+
+## TypeScript generics to the rescue
+
+The trick is to allow a **Generic** to be passed into the hook, while defaulting to the full data type returned when a **select** is not in use.
+
+<Code
+  code={useGetAlienWithGenerics}
+  lang='ts'
+  title='useGetAlien.ts'
+  collapse='1-11'
+  ins={[12, 18]}
+/>
+
+This way if we use a **select** function in another custom hook, the return type of the **select** is passed through.
+
+Otherwise, if no select is used, it defaults to the full data we expect from the hook (the `Alien`). Both of our custom hooks now work as expected, and have the correct type inference based on the data they return.
+
+## Considerations
+
+This isn't the only way to set these up though. We could go full hog and provide all the Generics, all the time, and type all the options (with `UseQueryOptions<...>`) but [it's not recommended](https://tkdodo.eu/blog/react-query-and-type-script#infer-all-the-things).
+
+TkDodo has said that new **Generics** may be introduced, and if we're currently only providing the existing ones from today, this may break on future upgrades.
+
+Or, alternatively, we could abstract the **queryFn** into its own importable function and then use that in two separate hooks with mostly duplicate useQuery code (though return data type would be different).
+
+So for now, using **select** with a little sprinkle of a **Generic** has worked great for me.
+
+<QueryLogger client:load />
+<PostFooter />
+
+---
+
+[^2hardproblems]: "_There are only two hard things in Computer Science: cache invalidation and naming things._" - [Phil Karlton](https://martinfowler.com/bliki/TwoHardThings.html)

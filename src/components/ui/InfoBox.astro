@@ -1,0 +1,56 @@
+---
+import { Icon } from 'astro-icon/components';
+
+type Props = {
+  type?: 'note' | 'warning' | 'info' | 'error';
+};
+const { type = 'info' } = Astro.props;
+---
+
+<div
+  class:list={{
+    ['border border-solid border-border border-l-4 shadow-md p-4 flex gap-8 items-baseline my-4 -mx-6 sm:mx-0']: true,
+    ['border-l-ring bg-ring/10']: type === 'info',
+    ['border-l-yellow-500 bg-yellow-500/10']: type === 'warning',
+    ['border-l-accent-foreground bg-accent-foreground/10']: type === 'note',
+    ['border-l-destructive bg-destructive/10']: type === 'error',
+  }}
+>
+  <div class='pl-4 hidden sm:block'>
+    {
+      type === 'info' ? (
+        <Icon
+          name='solar:info-circle-broken'
+          class='h-6 w-6 text-ring animate-ping motion-reduce:animate-none duration-2s'
+        />
+      ) : null
+    }
+    {
+      type === 'warning' ? (
+        <Icon
+          name='solar:shield-warning-broken'
+          class='h-6 w-6 text-yellow-500 animate-ping motion-reduce:animate-none duration-2s'
+        />
+      ) : null
+    }
+    {
+      type === 'note' ? (
+        <Icon
+          name='solar:notebook-square-broken'
+          class='h-6 w-6 text-accent-foreground animate-ping motion-reduce:animate-none duration-2s'
+        />
+      ) : null
+    }
+    {
+      type === 'error' ? (
+        <Icon
+          name='solar:close-circle-broken'
+          class='h-6 w-6 text-destructive animate-ping motion-reduce:animate-none duration-2s'
+        />
+      ) : null
+    }
+  </div>
+  <div>
+    <slot />
+  </div>
+</div>

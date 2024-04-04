@@ -1,0 +1,44 @@
+---
+title: 'Pre-Push Time Saver'
+publishedAt: 2023-05-25
+description: 'A little time saver using the git pre-push hook'
+slug: 'pre-push-time-saver'
+tags: ['git']
+isPublished: true
+---
+
+import PostFooter from '@/components/posts/PostFooter.astro';
+import InfoBox from '@/components/ui/InfoBox.astro';
+import { Code } from 'astro-expressive-code/components';
+import prepush from './pre-push.sh?raw';
+
+Git has [a range of hooks](https://git-scm.com/docs/githooks) that you can use to protect yourself against mistakes, or ensure code standards are kept across your team. I recently had a need to add a `pre-push` hook to save myself some time when pushing up new PR's.
+
+Our test suite can take quite a while to run, so I'll typically push up, and then move onto other things to come back in a little bit after CI has finished in case tweaks are needed that I missed or didn't run into locally.
+
+Occasionally, I'll be working on a part of the code that looks okay in VSCode, but then fails our typechecking or lint checks because a part of my change broke a file I didn't have open. This pre-push hook makes sure I don't forget to run typechecking before I push up any changes, and will block the push if it fails. Meaning I get a much quicker feedback loop locally rather than needing to wait for CI.
+
+While this does slow down my initial pushes, it's saved me more times than it probably should have and let me fix things up before the CI gets a chance to run.
+
+### How to install
+
+To get this running in a project, we can create a file in `.git/hooks/pre-push` and make it executable with `chmod +x .git/hooks/pre-push`:
+
+<Code code={prepush} lang='sh' title='pre-push.sh' />
+
+### VSCode integration
+
+To [get this working in VSCode](https://github.com/microsoft/vscode/issues/132778#issuecomment-1047763835), we also need to add the `push` command to the `git.commandsToLog` setting inside our VSCode preferences. This allows us to view the error log on failure from within VSCode too.
+
+With these two things in place, we're off to the races!
+
+<InfoBox>
+  <p>
+    In case you ever need to "just get it pushed", you can force push your
+    branch by using the
+    [--no-verify](https://git-scm.com/docs/git-push#Documentation/git-push.txt---no-verify)
+    flag: `git push --no-verify`
+  </p>
+</InfoBox>
+
+<PostFooter />

@@ -1,10 +1,9 @@
 ---
-import { CollectionEntry, getCollection } from "astro:content";
-import Layout from "@/layouts/Layout.astro";
-import formatDate from "@/utils/formatDate";
+import { type CollectionEntry, getCollection } from 'astro:content';
+import Layout from '@/components/layout/Layout.astro';
 
 export async function getStaticPaths() {
-  const posts = await getCollection("posts");
+  const posts = await getCollection('posts');
 
   return posts.map((post) => ({
     params: { slug: post.slug },
@@ -13,22 +12,59 @@ export async function getStaticPaths() {
 }
 
 type Props = {
-  post: CollectionEntry<"posts">;
+  post: CollectionEntry<'posts'>;
 };
 
 const { post } = Astro.props;
-const { Content } = await post.render();
+const { Content, remarkPluginFrontmatter } = await post.render();
+const readingTime = Math.round(remarkPluginFrontmatter?.estReadingTime);
+import { fade } from 'astro:transitions';
 ---
 
 <Layout title={post.data.title} description={post.data.description}>
-  <main class="post mx-auto flex w-full max-w-prose flex-col gap-4">
-    <header role="presentation">
-      <h1 class="text-md">
-        {post.data.title} - {formatDate(post.data.publishedAt)}
+  <article
+    class='prose dark:prose-invert font-sans lg:prose-xl prose-code:before:content-none prose-code:after:content-none prose-li:list-decimal-leading prose-ol:!text-xs prose-li:marker:text-base prose-li:marker:text-accent-foreground prose-code:text-accent-foreground prose-a:text-accent-foreground hover:prose-a:text-ring prose-a:no-underline mx-auto flex w-full max-w-prose flex-col gap-4 [&>div.expressive-code_div.copy]:-translate-y-11 [&>div.expressive-code]:rounded-none sm:[&>div.expressive-code_div.copy]:translate-y-0 [&>div.expressive-code_div.copy]:z-10 [&>div.expressive-code]:w-screen [&>div.expressive-code]:-mx-6 sm:[&>div.expressive-code]:m-auto [&>div.expressive-code]:max-w-xl sm:[&>div.expressive-code]:max-w-2xl lg:[&>div.expressive-code]:max-w-4xl'
+  >
+    <header role='presentation' class='grid py-10 md:py-20 m-auto max-w-fit'>
+      <h1
+        transition:name='title'
+        class='text-5xl font-extrabold text-foreground max-w-[25ch] leading-snug md:leading-none'
+      >
+        {post.data.title}
       </h1>
-      <p class="italic">{post.data.description}</p>
+      <div class='grid'>
+        <span class='text-xs text-muted-foreground uppercase'>
+          {
+            `${readingTime} min read • ${post?.data?.publishedAt
+              .toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })
+              .toLowerCase()}`
+          }
+        </span>
+        {
+          post?.data?.updatedAt ? (
+            <span class='text-xs text-muted-foreground uppercase font-bold'>
+              {`updated • ${post?.data?.updatedAt
+                .toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })
+                .toLowerCase()}`}
+            </span>
+          ) : null
+        }
+      </div>
     </header>
 
-    <Content />
-  </main>
+    <div
+      class='[&>div.expressive-code]:-mx-6 [&>div.expressive-code]:sm:mx-auto'
+      transition:animate={fade({ duration: '2s' })}
+    >
+      <Content />
+    </div>
+  </article>
 </Layout>

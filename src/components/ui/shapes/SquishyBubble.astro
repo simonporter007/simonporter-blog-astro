@@ -1,0 +1,23 @@
+---
+type Props = {
+  size?: 'sm' | 'md' | 'lg';
+};
+
+const { size = 'md' } = Astro.props;
+---
+
+<div
+  transition:persist
+  class:list={{
+    [`bg-[hsl(327_94%_75%)] border-solid border-[hsl(328_95%_85%)] absolute right-8 rounded-[48%_40%_62%_47%/61%_49%_64%_43%] opacity-30 box-shadow-accent animate-[rotate_35s_infinite_linear] motion-reduce:animate-none`]: true,
+    [`before:content-[''] before:absolute before:top-[5vmin] before:left-[5vmin] before:bg-accent-foreground before:border-solid before:border-[hsl(327_94%_65%)] before:rounded-[41%_40%_50%_55%/49%_52%_51%_43%] before:z-[-2] before:animate-[rotateBefore_35s_infinite_linear] motion-reduce:animate-none`]: true,
+    [`after:content-[''] after:absolute after:top-[10vmin] after:left-[10vmin] after:bg-[hsl(327_94%_35%)] after:border-solid after:border-[2.5vmin] after:border-[hsl(327_94%_45%)] after:rounded-[42%_63%_51%_60%/47%_62%_42%_52%] after:animate-[rotateAfter_35s_infinite_linear] motion-reduce:animate-none`]: true,
+    [`h-[40vmin] w-[40vmin] border-[3.5vmin] top-[calc(50%-(40vmin*0.65))] before:border-[2.25vmin] before:w-[calc(100%-(40vmin*0.3))] before:h-[calc(100%-(40vmin*0.3))] after:w-[calc(100%-(20vmin))] after:h-[calc(100%-(20vmin))]`]:
+      size === 'sm',
+    [`h-[50vmin] w-[50vmin] border-[4.5vmin] top-[calc(50%-(50vmin*0.65))] before:border-[3.25vmin] before:w-[calc(100%-(50vmin*0.3))] before:h-[calc(100%-(50vmin*0.3))] after:w-[calc(100%-(25vmin))] after:h-[calc(100%-(25vmin))]`]:
+      size === 'md',
+    [`h-[60vmin] w-[60vmin] border-[5.5vmin] top-[calc(50%-(60vmin*0.65))] before:border-[4.25vmin] before:w-[calc(100%-(60vmin*0.3))] before:h-[calc(100%-(60vmin*0.3))] after:w-[calc(100%-(30vmin))] after:h-[calc(100%-(30vmin))]`]:
+      size === 'lg',
+  }}
+>
+</div>
