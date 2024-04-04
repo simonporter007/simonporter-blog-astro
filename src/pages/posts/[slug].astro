@@ -1,7 +1,6 @@
 ---
 import { type CollectionEntry, getCollection } from 'astro:content';
 import Layout from '@/components/layout/Layout.astro';
-export const prerender = true;
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -63,7 +62,7 @@ import { fade } from 'astro:transitions';
 
     <div
       class='[&>div.expressive-code]:-mx-6 [&>div.expressive-code]:sm:mx-auto'
-      transition:animate={fade({ duration: '2s' })}
+      transition:animate={fade({ duration: '1s' })}
     >
       <Content />
     </div>

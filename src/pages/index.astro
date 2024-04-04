@@ -23,9 +23,10 @@ const readingTime = Math.round(remarkPluginFrontmatter?.estReadingTime);
     <div class='grid gap-8 m-auto max-w-fit'>
       <h1
         transition:name='title'
-        class='text-5xl font-extrabold text-foreground max-w-[25ch] prose'
+        class='text-4xl leading-normal font-extrabold text-foreground max-w-[25ch] prose'
       >
         <Link
+          isBold
           href={`/posts/${posts?.[0]?.slug}`}
           label={posts?.[0]?.data?.title}
         />
