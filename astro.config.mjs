@@ -13,7 +13,6 @@ import mdx from '@astrojs/mdx';
 import astroExpressiveCode from 'astro-expressive-code';
 import icon from 'astro-icon';
 import react from '@astrojs/react';
-import vercel from '@astrojs/vercel/serverless';
 
 const shikiConfig = {
   theme: 'dracula',
@@ -22,10 +21,6 @@ const shikiConfig = {
 // https://astro.build/config
 // https://expressive-code.com/key-features/syntax-highlighting/
 export default defineConfig({
-  output: 'hybrid',
-  adapter: vercel({
-    webAnalytics: { enabled: true },
-  }),
   integrations: [
     react({
       include: ['**/components/*.tsx'],
