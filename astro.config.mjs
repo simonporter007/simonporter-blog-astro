@@ -14,10 +14,6 @@ import astroExpressiveCode from 'astro-expressive-code';
 import icon from 'astro-icon';
 import react from '@astrojs/react';
 
-const shikiConfig = {
-  theme: 'dracula',
-  wrap: false,
-};
 // https://astro.build/config
 // https://expressive-code.com/key-features/syntax-highlighting/
 export default defineConfig({
@@ -49,7 +45,6 @@ export default defineConfig({
     astroExpressiveCode(),
     mdx({
       syntaxHighlight: false,
-      shikiConfig,
       remarkPlugins: [remarkGemoji, remarkReadingTime],
       rehypePlugins: [
         rehypeAccessibleEmojis,
@@ -64,7 +59,6 @@ export default defineConfig({
   site: SITE_URL,
   markdown: {
     syntaxHighlight: false,
-    shikiConfig,
     remarkPlugins: [remarkGemoji, remarkReadingTime],
     rehypePlugins: [
       rehypeAccessibleEmojis,
