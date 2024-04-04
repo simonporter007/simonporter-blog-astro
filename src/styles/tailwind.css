@@ -1,3 +1,40 @@
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/fonts/Nunito-Regular.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/fonts/Nunito-Italic.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: bold;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/fonts/Nunito-Bold.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: bold italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/fonts/Nunito-BoldItalic.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'Bowlby One SC';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/fonts/BowlbyOneSC-Regular.ttf) format('truetype');
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -24,8 +61,8 @@
     --input: 240 5.9% 90%;
     --ring: 178 95% 40%;
     --radius: 0rem;
-    --font-sans: 'Nunito';
-    --font-headline: 'Bowlby One SC';
+    --font-sans: 'Nunito', 'Nunito fallback';
+    --font-headline: 'Bowlby One SC', 'Bowlby One SC fallback';
   }
 
   .dark {

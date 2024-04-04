@@ -13,6 +13,7 @@ import mdx from '@astrojs/mdx';
 import astroExpressiveCode from 'astro-expressive-code';
 import icon from 'astro-icon';
 import react from '@astrojs/react';
+import { FontaineTransform } from 'fontaine';
 
 // https://astro.build/config
 // https://expressive-code.com/key-features/syntax-highlighting/
@@ -63,5 +64,13 @@ export default defineConfig({
     ],
     remarkRehype: { footnoteLabel: 'Footnotes' },
     gfm: true,
+  },
+  vite: {
+    plugins: [
+      FontaineTransform.vite({
+        fallbacks: ['Arial'],
+        resolvePath: (id) => new URL(`./public${id}`, import.meta.url), // id is the font src value in the CSS
+      }),
+    ],
   },
 });

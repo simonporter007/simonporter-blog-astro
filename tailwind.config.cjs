@@ -37,8 +37,12 @@ module.exports = {
         '10s': '10s',
       },
       fontFamily: {
-        headline: ['Bowlby One SC', ...defaultTheme.fontFamily.sans],
-        sans: ['Nunito', ...defaultTheme.fontFamily.sans],
+        headline: [
+          'Bowlby One SC',
+          'Bowlby One SC fallback',
+          ...defaultTheme.fontFamily.sans,
+        ],
+        sans: ['Nunito', 'Nunito fallback', ...defaultTheme.fontFamily.sans],
       },
       colors: {
         border: 'hsl(var(--border))',

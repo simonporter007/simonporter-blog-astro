@@ -8,7 +8,6 @@ import NeonTriangle from '@/components/ui/shapes/NeonTriangle.astro';
 import NeonMarble from '@/components/ui/shapes/NeonMarble.astro';
 import SpeedInsights from '@vercel/speed-insights/astro';
 import { Tooltips } from 'astro-tooltips';
-import { AstroFont } from 'astro-font';
 
 import '@/styles/tailwind.css';
 import { ViewTransitions } from 'astro:transitions';
@@ -21,47 +20,24 @@ const headTags = Astro.props;
 <!doctype html>
 <html lang='en'>
   <head>
-    <link rel='preconnect' href='https://fonts.googleapis.com' />
-    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin />
     <link
       as='font'
-      crossorigin=''
+      crossorigin='true'
       rel='preload'
-      href='https://fonts.gstatic.com/s/nunito/v26/XRXX3I6Li01BKofIMNaNRs7nczIHNHI.woff2'
-      type='font/woff2'
+      href='/fonts/Nunito-Bold.ttf'
     />
     <link
       as='font'
-      crossorigin=''
+      crossorigin='true'
       rel='preload'
-      href='https://fonts.gstatic.com/s/bowlbyonesc/v25/DtVlJxerQqQm37tzN3wMug9P_gH2oipOnuCABQ.woff2'
-      type='font/woff2'
+      href='/fonts/Nunito-Regular.ttf'
     />
-    <AstroFont
-      config={[
-        {
-          src: [],
-          name: 'Nunito',
-          googleFontsURL:
-            'https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap',
-          preload: false,
-          display: 'swap',
-          cssVariable: 'font-sans',
-          fallback: 'sans-serif',
-        },
-        {
-          src: [],
-          name: 'Bowlby One SC',
-          googleFontsURL:
-            'https://fonts.googleapis.com/css2?family=Bowlby+One+SC&display=swap',
-          preload: false,
-          display: 'swap',
-          cssVariable: 'font-headline',
-          fallback: 'sans-serif',
-        },
-      ]}
+    <link
+      as='font'
+      crossorigin='true'
+      rel='preload'
+      href='/fonts/BowlbyOneSC-Regular.ttf'
     />
-
     <ViewTransitions />
     <SEOTags {...headTags} />
     <Tooltips placement='top' />
