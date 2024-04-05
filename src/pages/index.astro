@@ -19,11 +19,11 @@ const readingTime = Math.round(remarkPluginFrontmatter?.estReadingTime);
 ---
 
 <Layout>
-  <article class='py-10 md:py-20'>
+  <article class='py-20 md:py-40 mt-8'>
     <div class='grid gap-8 m-auto max-w-fit'>
       <h1
         transition:name='title'
-        class='text-4xl leading-normal font-extrabold text-foreground max-w-[25ch] prose'
+        class='text-2xl sm:text-4xl leading-normal font-extrabold max-w-[25ch] prose'
       >
         <Link
           isBold
@@ -50,16 +50,14 @@ const readingTime = Math.round(remarkPluginFrontmatter?.estReadingTime);
       </div>
     </div>
   </article>
-  <section class='grid gap-10 md:gap-20'>
-    <article class='grid gap-8 pt-8 border-t border-solid border-foreground'>
-      <header class='flex w-full flex-row justify-between gap-2'>
-        <h3 class='text-lg text-foreground'>Latest posts</h3>
-      </header>
-      {posts.length === 0 && <p>Soon, stay connected 👀...</p>}
-
-      <section class='grid gap-4'>
-        {
-          posts.length !== 0 &&
+  <section class='grid border-t border-foreground'>
+    <h1 class='text-lg py-8'>Latest posts</h1>
+    {
+      posts.length === 0 ? (
+        <p>Soon, stay connected 👀...</p>
+      ) : (
+        <article class='grid gap-4'>
+          {posts.length !== 0 &&
             posts
               .slice(0, 10)
               .map((post) => (
@@ -70,33 +68,13 @@ const readingTime = Math.round(remarkPluginFrontmatter?.estReadingTime);
                   slug={post.slug}
                   tags={post.data.tags}
                 />
-              ))
-        }
-      </section>
-    </article>
-
-    <!-- TODO: Implement tools later -->
-    <!-- <article class="grid gap-8 pt-8 border-t border-solid border-foreground">
-      <header class="flex w-full flex-row justify-between gap-2">
-        <h3 class="text-lg text-foreground">
-          Tools
-        </h3>
-      </header>
-      {projects.length === 0 && <p>Coming soon...</p>}
-
-      <section class="grid gap-4">
-        {
-          projects.length !== 0 &&
-            projects.map((project) => <ProjectCard {...project} />)
-        }
-      </section>
-    </article> -->
-
-    <article class='grid gap-8 pt-8 border-t border-solid border-foreground'>
-      <header class='flex w-full flex-row justify-between gap-2'>
-        <h3 class='text-lg text-foreground'>Get in touch</h3>
-      </header>
-      <SocialLinks />
-    </article>
+              ))}
+        </article>
+      )
+    }
+  </section>
+  <section class='grid border-t border-foreground'>
+    <h1 class='text-lg py-8'>Get in touch</h1>
+    <SocialLinks />
   </section>
 </Layout>
