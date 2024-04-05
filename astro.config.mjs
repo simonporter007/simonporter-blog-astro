@@ -18,9 +18,14 @@ import { FontaineTransform } from 'fontaine';
 // https://astro.build/config
 // https://expressive-code.com/key-features/syntax-highlighting/
 export default defineConfig({
+  prefetch: {
+    prefetchAll: false,
+  },
   integrations: [
     react(),
-    tailwind(),
+    tailwind({
+      applyBaseStyles: false,
+    }),
     sitemap(),
     robotsTxt(),
     icon({
