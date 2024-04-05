@@ -1,0 +1,59 @@
+---
+import { type CollectionEntry, getCollection } from 'astro:content';
+import Layout from '@/components/layout/Layout.astro';
+import formatDate from '@/utils/formatDate';
+import PostCard from '@/components/posts/PostCard.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+
+  const tags: string[] = [];
+  for (const post of posts) {
+    for (const tag of post.data.tags) {
+      if (!tags.includes(tag)) {
+        tags.push(tag);
+      }
+    }
+  }
+
+  return tags.map((tag) => {
+    console.log({ tag });
+    return {
+      params: { tag },
+      props: {
+        posts: posts.filter((post) => post.data.tags.includes(tag)),
+      },
+    };
+  });
+}
+
+type Props = {
+  posts: CollectionEntry<'posts'>[];
+};
+
+const { posts } = Astro.props;
+const { tag } = Astro.params;
+---
+
+<Layout title={`All ${tag} posts`}>
+  <h1 class='text-2xl mt-8'>
+    Posts with tag: <span class='font-mono text-accent-foreground text-lg'
+      >{tag}</span
+    >
+  </h1>
+  <section class='grid gap-4'>
+    {
+      posts.map((post) => (
+        <article class='grid gap-4'>
+          <PostCard
+            publishedAt={post.data.publishedAt}
+            title={post.data.title}
+            description={post.data.description}
+            slug={post.slug}
+            tags={post.data.tags}
+          />
+        </article>
+      ))
+    }
+  </section>
+</Layout>

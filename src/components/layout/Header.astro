@@ -5,16 +5,22 @@ import { Icon } from 'astro-icon/components';
 
 <header
   role='banner'
-  class='flex w-full flex-col gap-2 md:flex-row md:justify-between gap-y-4 items-center border-b border-solid border-foreground pb-8'
+  class='flex w-full flex-col gap-2 md:flex-row md:justify-between gap-y-4 items-center border-b border-solid border-foreground py-8'
 >
-  <h1 class='font-headline text-4xl md:text-8xl text-foreground'>
-    simon<span class='text-4xl align-middle text-shadow-accent'> x </span>porter
+  <h1
+    class='font-headline text-4xl md:text-8xl text-foreground grid sm:flex items-center justify-items-center'
+  >
+    simon<span class='text-2xl md:text-4xl text-shadow-accent'> x </span>porter
   </h1>
 
   <nav role='navigation'>
-    <ul role='menubar' class='flex flex-row gap-2'>
+    <ul role='menubar' class='flex flex-row gap-4 sm:gap-2'>
       <li role='menuitem' class='min-w-6'>
-        <ThemeToggle client:only='react' transition:persist />
+        <ThemeToggle
+          client:only='react'
+          transition:persist
+          transition:persist-props
+        />
       </li>
       <!--  TODO: Add custom sound effects and toggle -->
       <!-- <li role='menuitem'>

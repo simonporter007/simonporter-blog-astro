@@ -42,7 +42,25 @@ const openGraph = {
   }}
   extend={{
     link: [
-      { rel: 'icon', href: '/favicon.ico' },
+      {
+        rel: 'preload',
+        href: '/fonts/Nunito-Bold.ttf',
+        as: 'font',
+        crossorigin: 'true',
+      },
+      {
+        rel: 'preload',
+        href: '/fonts/Nunito-Regular.ttf',
+        as: 'font',
+        crossorigin: 'true',
+      },
+      {
+        rel: 'preload',
+        href: '/fonts/BowlbyOneSC-Regular.ttf',
+        as: 'font',
+        crossorigin: 'true',
+      },
+      { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
       { rel: 'sitemap', href: '/sitemap-index.xml' },
     ],
     meta: [
