@@ -16,7 +16,7 @@ const headTags = Astro.props;
 ---
 
 <!doctype html>
-<html lang='en'>
+<html lang='en' data-animate='false' class='group/root'>
   <head>
     <ViewTransitions />
     <SEOTags {...headTags} />
@@ -35,7 +35,12 @@ const headTags = Astro.props;
           }
           return 'light';
         })();
-        document.documentElement.className = theme;
+
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
         document.documentElement.dataset.theme =
           theme === 'light' ? 'github-light' : 'dracula';
       }
@@ -49,6 +54,36 @@ const headTags = Astro.props;
       });
 
       setTheme();
+    </script>
+    <script is:inline>
+      function setAnimation() {
+        const isAnimationEnabled = (() => {
+          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            return false;
+          }
+          if (
+            typeof localStorage !== 'undefined' &&
+            localStorage.getItem('animate')
+          ) {
+            return localStorage.getItem('animate') === 'true';
+          }
+          return true;
+        })();
+
+        document.documentElement.dataset.animate = isAnimationEnabled
+          ? 'true'
+          : 'false';
+      }
+
+      document.addEventListener('astro:page-load', () => {
+        setAnimation();
+      });
+
+      document.addEventListener('astro:after-swap', () => {
+        setAnimation();
+      });
+
+      setAnimation();
     </script>
     <script>
       import type { TransitionBeforeSwapEvent } from 'astro:transitions/client';

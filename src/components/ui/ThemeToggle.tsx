@@ -50,7 +50,11 @@ export default function ThemeToggle() {
   });
 
   useEffect(() => {
-    document.documentElement.className = isDark ? 'dark' : 'light';
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
     document.documentElement.dataset.theme = isDark
       ? 'dracula'
       : 'github-light';
