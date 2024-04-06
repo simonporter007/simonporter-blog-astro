@@ -18,7 +18,7 @@ const { size = 'md' } = Astro.props;
       size === 'md',
     [`h-[60vmin] w-[60vmin] border-[5.5vmin] top-[calc(50%-(60vmin*0.65))] before:border-[4.25vmin] before:w-[calc(100%-(60vmin*0.3))] before:h-[calc(100%-(60vmin*0.3))] after:w-[calc(100%-(30vmin))] after:h-[calc(100%-(30vmin))]`]:
       size === 'lg',
-    ['group-data-[animate=false]:animate-none group-data-[animate=false]:before:animate-none group-data-[animate=false]:after:animate-none']: true,
+    ['group-data-[animate=false]/root:animate-none group-data-[animate=false]/root:before:animate-none group-data-[animate=false]/root:after:animate-none']: true,
   }}
 >
 </div>
