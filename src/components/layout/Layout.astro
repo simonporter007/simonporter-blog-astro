@@ -55,6 +55,36 @@ const headTags = Astro.props;
 
       setTheme();
     </script>
+    <script is:inline>
+      function setAnimation() {
+        const isAnimationEnabled = (() => {
+          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            return false;
+          }
+          if (
+            typeof localStorage !== 'undefined' &&
+            localStorage.getItem('animate')
+          ) {
+            return localStorage.getItem('animate') === 'true';
+          }
+          return true;
+        })();
+
+        document.documentElement.dataset.animate = isAnimationEnabled
+          ? 'true'
+          : 'false';
+      }
+
+      document.addEventListener('astro:page-load', () => {
+        setAnimation();
+      });
+
+      document.addEventListener('astro:after-swap', () => {
+        setAnimation();
+      });
+
+      setAnimation();
+    </script>
     <script>
       import type { TransitionBeforeSwapEvent } from 'astro:transitions/client';
       document.addEventListener('astro:transition-before-swap', (event) => {
