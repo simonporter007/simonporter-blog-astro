@@ -16,7 +16,7 @@ const headTags = Astro.props;
 ---
 
 <!doctype html>
-<html lang='en'>
+<html lang='en' data-animate='false' class='group'>
   <head>
     <ViewTransitions />
     <SEOTags {...headTags} />
@@ -35,7 +35,12 @@ const headTags = Astro.props;
           }
           return 'light';
         })();
-        document.documentElement.className = theme;
+
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
         document.documentElement.dataset.theme =
           theme === 'light' ? 'github-light' : 'dracula';
       }
