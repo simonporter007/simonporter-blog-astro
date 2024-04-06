@@ -1,4 +1,5 @@
 ---
+import AnimationToggle from '@/components/ui/AnimationToggle';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import { Icon } from 'astro-icon/components';
 ---
@@ -17,6 +18,13 @@ import { Icon } from 'astro-icon/components';
     <ul role='menubar' class='flex flex-row gap-4 sm:gap-2'>
       <li role='menuitem' class='min-w-6'>
         <ThemeToggle
+          client:only='react'
+          transition:persist
+          transition:persist-props
+        />
+      </li>
+      <li role='menuitem' class='min-w-6'>
+        <AnimationToggle
           client:only='react'
           transition:persist
           transition:persist-props
