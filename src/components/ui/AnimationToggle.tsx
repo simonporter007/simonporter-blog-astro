@@ -46,7 +46,7 @@ export default function AnimationToggle() {
       title={title}
       onClick={handleClick}
       disabled={prefersReducedMotion}
-      className='disabled:text-muted-foreground light-icon grid place-content-center text-accent-foreground transition animate-in animate-out hover:text-ring'
+      className='grid place-content-center text-accent-foreground transition animate-in animate-out hover:text-ring disabled:text-muted-foreground'
     >
       <animated.svg
         className='relative size-6 overflow-visible'

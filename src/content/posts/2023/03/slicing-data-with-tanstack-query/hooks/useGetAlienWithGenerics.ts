@@ -15,6 +15,7 @@ export function useGetAlien<T = Alien>({
 }: {
   id: number;
   options?: {
+    // eslint-disable-next-line no-unused-vars
     select?: (alien: Alien) => T;
   };
 }) {

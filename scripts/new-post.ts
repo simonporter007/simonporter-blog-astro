@@ -27,7 +27,7 @@ if (!postName) {
 
 const { year, month, day } = getDateForPost();
 const frontmatter = `---
-title: ''
+title: '${postName.replaceAll('-', ' ')}'
 publishedAt: ${year}-${month}-${day}
 description: ''
 slug: '${postName}'
@@ -41,8 +41,9 @@ const filePath = path.resolve(
   'content',
   'posts',
   year,
-  month
+  month,
+  postName
 );
 
 fs.mkdirSync(filePath, { recursive: true });
-fs.writeFileSync(path.resolve(filePath, postName, `index.mdx`), frontmatter);
+fs.writeFileSync(path.resolve(filePath, `index.mdx`), frontmatter);

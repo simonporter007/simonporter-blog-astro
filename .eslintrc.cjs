@@ -1,8 +1,14 @@
 /** @type {import("eslint").Linter.Config} */
 module.exports = {
-  extends: ['plugin:astro/recommended', 'plugin:react-hooks/recommended'],
-  plugins: ['unused-imports'],
-  parser: '@typescript-eslint/parser',
+  extends: [
+    'plugin:@typescript-eslint/recommended',
+    'plugin:astro/recommended',
+    'plugin:eslint-plugin-react/recommended',
+    'plugin:react-hooks/recommended',
+    'plugin:react/recommended',
+    'plugin:tailwindcss/recommended',
+  ],
+  plugins: ['unused-imports', 'react'],
   parserOptions: {
     tsconfigRootDir: __dirname,
     sourceType: 'module',
@@ -18,11 +24,23 @@ module.exports = {
       },
       rules: {},
     },
+    {
+      files: ['*.md', '*.mdx'],
+      // parser: "eslint-mdx", // this is set by `plugin:mdx/recommended` automatically
+      extends: ['plugin:mdx/recommended'],
+    },
   ],
   rules: {
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'error',
     'no-unused-vars': 'error',
     'unused-imports/no-unused-imports': 'error',
+    'react/react-in-jsx-scope': 'off',
+    'react/prop-types': 'off',
+  },
+  settings: {
+    react: {
+      version: 'detect',
+    },
   },
 };

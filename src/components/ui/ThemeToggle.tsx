@@ -73,7 +73,7 @@ export default function ThemeToggle() {
       aria-label={title}
       title={title}
       onClick={handleClick}
-      className='light-icon grid place-content-center text-accent-foreground transition animate-in animate-out hover:text-ring'
+      className='grid place-content-center text-accent-foreground transition animate-in animate-out hover:text-ring'
     >
       <animated.svg
         className='relative size-6 overflow-visible hover:text-ring'
