@@ -97,6 +97,10 @@ const headTags = Astro.props;
         });
       });
     </script>
+    <script>
+      import { inject } from '@vercel/analytics';
+      inject();
+    </script>
   </head>
 
   <SpeedInsights />
