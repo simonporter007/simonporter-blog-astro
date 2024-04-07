@@ -1,0 +1,109 @@
+---
+title: 'Adding Vercel analytics to your static Astro site'
+publishedAt: 2024-04-07
+description: 'Vercel analytics is a great way to track your Astro site usage, and the hobby plan bundles it for free! Here is two options for adding it to your Astro site, even when running in "static" output mode.'
+slug: 'adding-vercel-analytics-to-your-static-astro-site'
+tags: ['astro']
+isPublished: true
+---
+
+import { Image } from 'astro:assets';
+import { Code } from 'astro-expressive-code/components';
+import InfoBox from '@/components/ui/InfoBox.astro';
+import PostFooter from '@/components/posts/PostFooter.astro';
+import vercelScript from '@/content/posts/2024/04/adding-vercel-analytics-to-your-static-astro-site/images/network-tab-with-vercel-script.png';
+import enableAnalytics from '@/content/posts/2024/04/adding-vercel-analytics-to-your-static-astro-site/images/vercel-dashboard-enable-analytics.png';
+
+Vercel analytics is a great way to track your Astro site usage if you're already using Vercel for hosting, and the hobby plan bundles it for free!
+
+There are [some limits for the hobby plans](https://vercel.com/docs/analytics/limits-and-pricing), but if you're just getting started with a project, it certainly beats involving something heavy like Google Analytics. Vercel's analytics script comes in at a tiny **1.1kb** with no extra account setup. For that you get page views, unique visitors, and referrers.
+
+As you grow you may find your analytics needs increase, but for a simple site, this is a great way to get started.
+
+# Installation
+
+It's a one click process to enable it in your account. So let's head on over to our Vercel dashboard > select the project we want to enable analytics for > select the analytics tab and then hit the **Enable** button to get started.
+
+<Image
+  class='border border-ring shadow-lg shadow-ring'
+  src={enableAnalytics}
+  alt='A screenshot of the Vercel dashboard for our project showing the Enable analytics button script.'
+/>
+
+We then have a couple of different options to configure it for either **server** or **hybrid** output modes.
+
+## Option A - Using Vercel's adaptor
+
+Vercel has written up the instructions for adding the analytics script to your Astro site when using their adaptor in their [documentation](https://vercel.com/docs/frameworks/astro#using-vercel%27s-features-with-astro). This is the easiest way to get started, as it fits right alongside your Astro config.
+
+First, use `astro` to install the Vercel adaptor, or manually install it with:
+
+<Code
+  code={`pnpm astro add vercel
+# or manually install
+pnpm add @vercel/astro
+`}
+  lang='sh'
+/>
+
+Then specify the Vercel adaptor in your Astro config and enable the analytics feature:
+
+<Code
+code={`
+// for static/ssg output
+import vercel from '@astrojs/vercel/static';
+// for server/ssr output
+// import vercel from '@astrojs/vercel/serverless';
+
+export default defineConfig({
+  output: 'static',
+  adapter: vercel({
+    webAnalytics: {
+      enabled: true,
+    },
+  }),
+});
+`} lang="ts" />
+
+After deploying this to change to production, we'll see the Vercel adaptor load our 1.1kb analytics script from the CDN `https://cdn.vercel-insights.com/v1/script.js`
+
+## Option B - Manual install
+
+This option is good for when we're running our Astro site in **static** output mode[^static] and don't want to involve the Vercel adaptor into our flow. **static** is the default mode for Astro, and it's the most performant way to run your site as all our pages are pre-rendered at build time.
+
+To do this, we just need to add an additional script into our common **Head** or common **Layout**:
+
+<Code
+  code={`
+<script>
+    import { inject } from '@vercel/analytics';
+    inject();
+</script>
+`}
+  lang='html'
+/>
+
+After adding this, we should start to see the analytics data in our Vercel dashboard. Loading the site also shows us the request being made to the `https://${ourDomain}/_vercel/insights/script.js` endpoint to load the tiny 1.1kb script.
+
+<Image
+  class='border border-ring shadow-lg shadow-ring'
+  src={vercelScript}
+  alt='A screenshot of the developer tools network tab with the Vercel Analytics script MiddlewareCantBeLoaded.'
+/>
+
+And with that we're done!
+
+<InfoBox type='warning'>
+  <p>
+    If a user of your site has a decent Adblocker, or is using a privacy focused
+    browser, they may not be tracked by the Vercel analytics script.
+  </p>
+  <p>
+    In my testing Brave seemed to still block the custom domain hosted
+    `script.js` file too.
+  </p>
+</InfoBox>
+
+<PostFooter />
+
+[^static]: SSG is static site generation. It's a way to pre-render your site at build time, and serve the static files to users. This is in contrast to SSR or 'server' mode (server-side rendering) where the server generates the HTML on each request.

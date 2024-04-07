@@ -25,8 +25,7 @@ module.exports = {
     },
     {
       files: ['*.md', '*.mdx'],
-      // parser: "eslint-mdx", // this is set by `plugin:mdx/recommended` automatically
-      extends: ['plugin:mdx/recommended', 'plugin:import/recommended'],
+      extends: ['plugin:mdx/recommended'],
     },
   ],
   rules: {
