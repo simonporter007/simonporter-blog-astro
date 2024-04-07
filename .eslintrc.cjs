@@ -3,7 +3,6 @@ module.exports = {
   extends: [
     'plugin:@typescript-eslint/recommended',
     'plugin:astro/recommended',
-    'plugin:eslint-plugin-react/recommended',
     'plugin:react-hooks/recommended',
     'plugin:react/recommended',
     'plugin:tailwindcss/recommended',
