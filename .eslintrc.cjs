@@ -8,7 +8,7 @@ module.exports = {
     'plugin:react/recommended',
     'plugin:tailwindcss/recommended',
   ],
-  plugins: ['unused-imports', 'react'],
+  plugins: ['unused-imports', 'import', 'react'],
   parserOptions: {
     tsconfigRootDir: __dirname,
     sourceType: 'module',
@@ -27,7 +27,7 @@ module.exports = {
     {
       files: ['*.md', '*.mdx'],
       // parser: "eslint-mdx", // this is set by `plugin:mdx/recommended` automatically
-      extends: ['plugin:mdx/recommended'],
+      extends: ['plugin:mdx/recommended', 'plugin:import/recommended'],
     },
   ],
   rules: {
@@ -41,6 +41,12 @@ module.exports = {
   settings: {
     react: {
       version: 'detect',
+    },
+    'import/resolver': {
+      typescript: {
+        alwaysTryTypes: true,
+        project: './tsconfig.json',
+      },
     },
   },
 };
