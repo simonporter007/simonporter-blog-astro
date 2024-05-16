@@ -51,13 +51,15 @@ for (const child of tree.children) {
     child.children?.[0]?.value.startsWith('title:')
   ) {
     const title = child.children[0].value.match(/title: '(.+?)'/)?.[1];
+    const description =
+      child.children[0].value.match(/description: '(.+?)'/)?.[1];
     const publishedAt =
       child.children[0].value.match(/publishedAt: (.+?)\n/)?.[1];
     const tags = child.children[0].value
       .match(/tags: \[(.+?)\]/)?.[1]
       .replaceAll("'", '');
 
-    const newFrontmatter = `title: ${title}\npublished: true\ndate: ${publishedAt} 00:00:00 UTC\ntags: ${tags}\ncanonical_url: https://www.simonporter.co.uk/posts/${postName}`;
+    const newFrontmatter = `title: ${title}\ndescription: ${description}\npublished: true\ndate: ${publishedAt} 00:00:00 UTC\ntags: ${tags}\ncanonical_url: https://www.simonporter.co.uk/posts/${postName}`;
     const newHeading = {
       ...child,
       children: [
