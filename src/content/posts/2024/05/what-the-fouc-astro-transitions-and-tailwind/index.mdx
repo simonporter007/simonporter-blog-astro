@@ -1,0 +1,83 @@
+---
+title: 'What the FOUC? Dark mode with Astro transitions and Tailwind'
+publishedAt: 2024-05-16
+description: "Astro transitions are a fantastic little addition for your static sites. Built on top of Web APIs they allow for a little flair for your blog with little implementation. However, they can cause the dreaded Flash of Unstyled Content - let's see how we can fix that."
+slug: 'what-the-fouc-astro-transitions-and-tailwind'
+tags: ['astro', 'tailwind', 'react']
+isPublished: true
+---
+
+import { Image } from 'astro:assets';
+import { Code } from 'astro-expressive-code/components';
+import ThemeToggleRaw from './components/ThemeToggle?raw';
+import pageLoadFix from './scripts/page-load-fix.html?raw';
+import pageTransitionFix from './scripts/page-transition-fix.html?raw';
+import ThemeToggle from './components/ThemeToggle';
+import PostFooter from '@/components/posts/PostFooter.astro';
+import foucGif from '@/content/posts/2024/05/what-the-fouc-astro-transitions-and-tailwind/images/fouc-me.gif';
+import pageLoadFixGif from '@/content/posts/2024/05/what-the-fouc-astro-transitions-and-tailwind/images/page-load-fouc-fixed.gif';
+
+Astro transitions are great. Some folks are coming up with some [really slick examples](https://spotify-astro-transitions.vercel.app/) of how to use them, and even this little ole blog uses the defaults just to add a little flair when navigating between pages. However, I ran into a little issue when I started to implement dark mode on this site. The dreaded **Flash of Unstyled Content** (FOUC).
+
+## What is the FOUC?
+
+A **Flash of Unstyled Content** is when the browser renders the page before the CSS has been loaded. The browser will render the page with the default styles, and then apply the CSS once it has been loaded. This can cause a jarring experience for the user, especially if the page is styled differently after the CSS has been loaded (_often noticeable when switching between light and dark mode!_).
+
+<Image
+  class='border border-ring shadow-lg shadow-ring'
+  src={foucGif}
+  alt='This site showing the fouc when loading and having a dark mode saved preference.'
+/>
+
+You can see the site initially loads with the white theme in place, then the dark mode preference is read from localstorage, and so the Tailwind dark class is applied and the theme changed. This causes the content to flicker as the styles are swapped out, and can happen during page transitions as well.
+
+Josh Comeau has [a great article on the dreaded flicker](https://www.joshwcomeau.com/react/dark-mode/) and how to prevent it, which is well worth a read!
+
+So lets see how we can use that knowledge to prevent the FOUC when using Astro transitions and Tailwind.
+
+## The setup
+
+So in this case I'm using a React Astro island for my theme toggle. It attempts to load the current theme into state, and then a useEffect will adjust the document body with the Tailwind class accordingly.
+
+<Code code={ThemeToggleRaw} lang='tsx' title='ThemeToggle.tsx' />
+
+and here he is, try giving him a click!
+
+<ThemeToggle client:load />
+
+This works fine, but we would still have the FOUC when pages transition and on initial load, so let's fix the page load first.
+
+## Page load
+
+To fix the FOUC on page load, we can use a little bit of JavaScript to add a class to the document body when the page is loaded. The reason this works is because we use the [Astro directive](https://docs.astro.build/en/reference/directives-reference/#isinline) `is:inline` to add the script to the page, and it will be executed before the page is rendered. As usually Astro will strip out any script tags, but with `is:inline` we can keep them in place.
+
+We can place the following code in the head of our document.
+
+<Code code={pageLoadFix} lang='html' title='page-load-fix.html' />
+
+First we setup a function to set the theme which uses a `theme` function to try and load the current theme from storage, which would be a previously set preference. Failing that, we fallback to match the media query to provide the preference of the user based on their system settings. Lastly, if none of that matches, it would return the `'light'` theme.
+
+With the theme value set, we then add the class to the document body, which will apply the theme to the page before render because the script is inline in our `<head>`, therefore parsed and rendered before the rest of the HTML.
+
+## Page transitions
+
+<Image
+  class='border border-ring shadow-lg shadow-ring'
+  src={pageLoadFixGif}
+  alt='The site showing no fouc for page load, but page transitions still causing an issue.'
+/>
+
+You'll notice that the page transitions still cause a FOUC (and if you look really closely, you'll notice the page reload where the font resets itself, is fixed! 🎉). This is because the Astro transitions are replacing the page elements. So when the page transitions, the body class is removed and then reapplied, causing the flicker.
+
+To fix this, we can use some additional Astro events, `astro:page-load` and `astro:after-swap`, to listen out for page transitions. That way we can trigger applying the body class correctly in all cases.
+
+<Code
+  code={pageTransitionFix}
+  lang='html'
+  title='page-transition-fix.html'
+  ins={[25, 26, 27, 28, 29, 30, 31]}
+/>
+
+That's what's in place on this site, and how it's working!
+
+<PostFooter />
