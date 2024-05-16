@@ -72,7 +72,6 @@ You'll notice that the page transitions still cause a FOUC (and if you look real
 To fix this, we can use some additional Astro events, `astro:page-load` and `astro:after-swap`, to listen out for page transitions. That way we can trigger applying the body class correctly in all cases.
 
 <Code
-  collapse='2-23'
   code={pageTransitionFix}
   lang='html'
   title='page-transition-fix.html'
