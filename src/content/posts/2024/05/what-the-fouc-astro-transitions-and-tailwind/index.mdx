@@ -7,15 +7,14 @@ tags: ['astro', 'tailwind', 'react']
 isPublished: true
 ---
 
-import { Image } from 'astro:assets';
 import { Code } from 'astro-expressive-code/components';
 import ThemeToggleRaw from './components/ThemeToggle?raw';
 import pageLoadFix from './scripts/page-load-fix.html?raw';
 import pageTransitionFix from './scripts/page-transition-fix.html?raw';
 import ThemeToggle from './components/ThemeToggle';
 import PostFooter from '@/components/posts/PostFooter.astro';
-import foucGif from '@/content/posts/2024/05/what-the-fouc-astro-transitions-and-tailwind/images/fouc-me.gif';
-import pageLoadFixGif from '@/content/posts/2024/05/what-the-fouc-astro-transitions-and-tailwind/images/page-load-fouc-fixed.gif';
+import foucIssue from '@/content/posts/2024/05/what-the-fouc-astro-transitions-and-tailwind/images/fouc-me.webm';
+import foucFix from '@/content/posts/2024/05/what-the-fouc-astro-transitions-and-tailwind/images/page-load-fouc-fixed.webm';
 
 Astro transitions are great. Some folks are coming up with some [really slick examples](https://spotify-astro-transitions.vercel.app/) of how to use them, and even this little ole blog uses the defaults just to add a little flair when navigating between pages. However, I ran into a little issue when I started to implement dark mode on this site. The dreaded **Flash of Unstyled Content** (FOUC).
 
@@ -23,11 +22,10 @@ Astro transitions are great. Some folks are coming up with some [really slick ex
 
 A **Flash of Unstyled Content** is when the browser renders the page before the CSS has been loaded. The browser will render the page with the default styles, and then apply the CSS once it has been loaded. This can cause a jarring experience for the user, especially if the page is styled differently after the CSS has been loaded (_often noticeable when switching between light and dark mode!_).
 
-<Image
-  class='border border-ring shadow-lg shadow-ring'
-  src={foucGif}
-  alt='This site showing the fouc when loading and having a dark mode saved preference.'
-/>
+<video width='800' height='406' controls='' autoPlay muted loop>
+  <source src={foucIssue} type='video/webm' />
+  Your browser does not support the video tag. You can download the video anyway.
+</video>
 
 You can see the site initially loads with the white theme in place, then the dark mode preference is read from localstorage, and so the Tailwind dark class is applied and the theme changed. This causes the content to flicker as the styles are swapped out, and can happen during page transitions as well.
 
@@ -61,11 +59,10 @@ With the theme value set, we then add the class to the document body, which will
 
 ## Page transitions
 
-<Image
-  class='border border-ring shadow-lg shadow-ring'
-  src={pageLoadFixGif}
-  alt='The site showing no fouc for page load, but page transitions still causing an issue.'
-/>
+<video width='800' height='448' controls='' autoPlay muted loop>
+  <source src={foucFix} type='video/webm' />
+  Your browser does not support the video tag. You can download the video anyway.
+</video>
 
 You'll notice that the page transitions still cause a FOUC (and if you look really closely, you'll notice the page reload where the font resets itself, is fixed! 🎉). This is because the Astro transitions are replacing the page elements. So when the page transitions, the body class is removed and then reapplied, causing the flicker.
 
