@@ -3,5 +3,25 @@
     "editor.wordWrap": "bounded",
     "editor.wordWrapColumn": 120
   },
-  "eslint.validate": ["markdown", "mdx"]
+  "eslint.validate": ["markdown", "mdx"],
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#24b881",
+    "activityBar.background": "#24b881",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#f2e4fa",
+    "activityBarBadge.foreground": "#15202b",
+    "commandCenter.border": "#e7e7e799",
+    "sash.hoverBorder": "#24b881",
+    "statusBar.background": "#1c8d63",
+    "statusBar.foreground": "#e7e7e7",
+    "statusBarItem.hoverBackground": "#24b881",
+    "statusBarItem.remoteBackground": "#1c8d63",
+    "statusBarItem.remoteForeground": "#e7e7e7",
+    "titleBar.activeBackground": "#1c8d63",
+    "titleBar.activeForeground": "#e7e7e7",
+    "titleBar.inactiveBackground": "#1c8d6399",
+    "titleBar.inactiveForeground": "#e7e7e799"
+  },
+  "peacock.color": "#1c8d63"
 }
