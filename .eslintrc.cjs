@@ -7,6 +7,7 @@ module.exports = {
     'plugin:react/recommended',
     'plugin:tailwindcss/recommended',
   ],
+  extraFileExtensions: ['.astro'],
   plugins: ['unused-imports', 'import', 'react'],
   parserOptions: {
     tsconfigRootDir: __dirname,
@@ -21,7 +22,10 @@ module.exports = {
         parser: '@typescript-eslint/parser',
         extraFileExtensions: ['.astro'],
       },
-      rules: {},
+      rules: {
+        // override/add rules settings here, such as:
+        // "astro/no-set-html-directive": "error"
+      },
     },
     {
       files: ['*.md', '*.mdx'],

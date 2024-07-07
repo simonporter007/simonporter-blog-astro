@@ -44,18 +44,7 @@ export default defineConfig({
       },
     }),
     astroExpressiveCode(),
-    mdx({
-      syntaxHighlight: false,
-      remarkPlugins: [remarkGemoji, remarkReadingTime],
-      rehypePlugins: [
-        rehypeAccessibleEmojis,
-        rehypeMeta,
-        rehypeAutolinkHeadings,
-        rehypeSlug,
-      ],
-      remarkRehype: { footnoteLabel: 'Footnotes' },
-      gfm: true,
-    }),
+    mdx(),
   ],
   site: SITE_URL,
   markdown: {
@@ -64,8 +53,8 @@ export default defineConfig({
     rehypePlugins: [
       rehypeAccessibleEmojis,
       rehypeMeta,
-      rehypeAutolinkHeadings,
       rehypeSlug,
+      rehypeAutolinkHeadings,
     ],
     remarkRehype: { footnoteLabel: 'Footnotes' },
     gfm: true,
@@ -73,7 +62,7 @@ export default defineConfig({
   vite: {
     plugins: [
       FontaineTransform.vite({
-        fallbacks: ['Arial'],
+        fallbacks: ['Roboto'],
         resolvePath: (id) => new URL(`./public${id}`, import.meta.url), // id is the font src value in the CSS
       }),
     ],
