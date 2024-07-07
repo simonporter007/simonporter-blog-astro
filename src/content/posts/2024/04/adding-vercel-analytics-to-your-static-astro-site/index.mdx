@@ -38,18 +38,15 @@ Vercel has written up the instructions for adding the analytics script to your A
 
 First, use `astro` to install the Vercel adaptor, or manually install it with:
 
-<Code
-  code={`pnpm astro add vercel
+```sh
+pnpm astro add vercel
 # or manually install
 pnpm add @vercel/astro
-`}
-  lang='sh'
-/>
+```
 
 Then specify the Vercel adaptor in your Astro config and enable the analytics feature:
 
-<Code
-code={`
+```ts
 // for static/ssg output
 import vercel from '@astrojs/vercel/static';
 // for server/ssr output
@@ -63,7 +60,7 @@ export default defineConfig({
     },
   }),
 });
-`} lang="ts" />
+```
 
 After deploying this to change to production, we'll see the Vercel adaptor load our 1.1kb analytics script from the CDN `https://cdn.vercel-insights.com/v1/script.js`
 
@@ -73,15 +70,12 @@ This option is good for when we're running our Astro site in **static** output m
 
 To do this, we just need to add an additional script into our common **Head** or common **Layout**:
 
-<Code
-  code={`
+```html
 <script>
-    import { inject } from '@vercel/analytics';
-    inject();
+  import { inject } from '@vercel/analytics';
+  inject();
 </script>
-`}
-  lang='html'
-/>
+```
 
 After adding this, we should start to see the analytics data in our Vercel dashboard. Loading the site also shows us the request being made to the `https://${ourDomain}/_vercel/insights/script.js` endpoint to load the tiny 1.1kb script.
 

@@ -8,9 +8,6 @@ isPublished: true
 ---
 
 import { Code } from 'astro-expressive-code/components';
-import ThemeToggleRaw from './components/ThemeToggle?raw';
-import pageLoadFix from './scripts/page-load-fix.html?raw';
-import pageTransitionFix from './scripts/page-transition-fix.html?raw';
 import ThemeToggle from './components/ThemeToggle';
 import PostFooter from '@/components/posts/PostFooter.astro';
 import foucIssue from '@/content/posts/2024/05/what-the-fouc-astro-transitions-and-tailwind/images/fouc-me.webm';
@@ -24,7 +21,8 @@ A **Flash of Unstyled Content** is when the browser renders the page before the 
 
 <video width='800' height='406' controls='' autoPlay muted loop>
   <source src={foucIssue} type='video/webm' />
-  Your browser does not support the video tag. You can download the video anyway.
+  Your browser does not support the video tag. You can download the video
+  anyway.
 </video>
 
 You can see the site initially loads with the white theme in place, then the dark mode preference is read from localstorage, and so the Tailwind dark class is applied and the theme changed. This causes the content to flicker as the styles are swapped out, and can happen during page transitions as well.
@@ -37,7 +35,41 @@ So lets see how we can use that knowledge to prevent the FOUC when using Astro t
 
 So in this case I'm using a React Astro island for my theme toggle. It attempts to load the current theme into state, and then a useEffect will adjust the document body with the Tailwind class accordingly.
 
-<Code code={ThemeToggleRaw} lang='tsx' title='ThemeToggle.tsx' />
+```tsx title="ThemeToggle.tsx"
+import { useEffect, useState } from 'react';
+
+/* Simplified theme toggle for FOUC demo */
+export default function ThemeToggle() {
+  const [theme, setTheme] = useState('');
+  const isDark = theme === 'dark';
+
+  useEffect(() => {
+    if (!theme) {
+      setTheme(localStorage?.getItem('theme') || 'light');
+    }
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    document.documentElement.dataset.theme = isDark
+      ? 'dracula'
+      : 'github-light';
+
+    localStorage?.setItem('theme', theme);
+  }, [isDark, theme]);
+
+  const handleClick = () => {
+    setTheme(isDark ? 'light' : 'dark');
+  };
+
+  return (
+    <button onClick={handleClick}>
+      {isDark ? ':new_moon_face:' : ':sun_with_face:'}
+    </button>
+  );
+}
+```
 
 and here he is, try giving him a click!
 
@@ -51,7 +83,34 @@ To fix the FOUC on page load, we can use a little bit of JavaScript to add a cla
 
 We can place the following code in the head of our document.
 
-<Code code={pageLoadFix} lang='html' title='page-load-fix.html' />
+```html title="page-load-fix.html"
+<script is:inline>
+  function setTheme() {
+    const theme = (() => {
+      if (
+        typeof localStorage !== 'undefined' &&
+        localStorage.getItem('theme')
+      ) {
+        return localStorage.getItem('theme');
+      }
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+      }
+      return 'light';
+    })();
+
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    document.documentElement.dataset.theme =
+      theme === 'light' ? 'github-light' : 'dracula';
+  }
+
+  setTheme();
+</script>
+```
 
 First we setup a function to set the theme which uses a `theme` function to try and load the current theme from storage, which would be a previously set preference. Failing that, we fallback to match the media query to provide the preference of the user based on their system settings. Lastly, if none of that matches, it would return the `'light'` theme.
 
@@ -61,19 +120,50 @@ With the theme value set, we then add the class to the document body, which will
 
 <video width='800' height='448' controls='' autoPlay muted loop>
   <source src={foucFix} type='video/webm' />
-  Your browser does not support the video tag. You can download the video anyway.
+  Your browser does not support the video tag. You can download the video
+  anyway.
 </video>
 
 You'll notice that the page transitions still cause a FOUC (and if you look really closely, you'll notice the page reload where the font resets itself, is fixed! 🎉). This is because the Astro transitions are replacing the page elements. So when the page transitions, the body class is removed and then reapplied, causing the flicker.
 
 To fix this, we can use some additional Astro events, `astro:page-load` and `astro:after-swap`, to listen out for page transitions. That way we can trigger applying the body class correctly in all cases.
 
-<Code
-  code={pageTransitionFix}
-  lang='html'
-  title='page-transition-fix.html'
-  ins={[25, 26, 27, 28, 29, 30, 31]}
-/>
+```html title="page-transition-fix.html" ins={25-31}
+<script is:inline>
+  function setTheme() {
+    const theme = (() => {
+      if (
+        typeof localStorage !== 'undefined' &&
+        localStorage.getItem('theme')
+      ) {
+        return localStorage.getItem('theme');
+      }
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+      }
+      return 'light';
+    })();
+
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    document.documentElement.dataset.theme =
+      theme === 'light' ? 'github-light' : 'dracula';
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    setTheme();
+  });
+
+  document.addEventListener('astro:after-swap', () => {
+    setTheme();
+  });
+
+  setTheme();
+</script>
+```
 
 That's what's in place on this site, and how it's working!
 
