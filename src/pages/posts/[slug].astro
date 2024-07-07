@@ -18,7 +18,6 @@ type Props = {
 const { post } = Astro.props;
 const { Content, remarkPluginFrontmatter } = await post.render();
 const readingTime = Math.round(remarkPluginFrontmatter?.estReadingTime);
-import { fade } from 'astro:transitions';
 ---
 
 <Layout title={post.data.title} description={post.data.description}>
@@ -62,7 +61,6 @@ import { fade } from 'astro:transitions';
 
     <div
       class='[&>div.expressive-code]:-mx-6 [&>div.expressive-code]:sm:mx-auto'
-      transition:animate={fade({ duration: '1s' })}
     >
       <Content />
     </div>

@@ -11,7 +11,6 @@ isPublished: true
 import PostFooter from '@/components/posts/PostFooter.astro';
 import InfoBox from '@/components/ui/InfoBox.astro';
 import { Code } from 'astro-expressive-code/components';
-import useGetAlien from './hooks/useGetAlien?raw';
 import useGetAlienWithGenerics from './hooks/useGetAlienWithGenerics?raw';
 import useGetAlienWithStringSelect from './hooks/useGetAlienWithStringSelect?raw';
 import useGetAlienEyeCount from './hooks/useGetAlienEyeCount?raw';
@@ -34,7 +33,35 @@ The select feature behaves like a redux selector. That is, it lets you take a la
 
 Here we have an example custom hook which uses Tanstack Query's `useQuery` API to request our `Alien` data.
 
-<Code code={useGetAlien} lang='ts' title='useGetAlien.ts' />
+```ts title="useGetAlien.ts"
+import { useQuery } from '@tanstack/react-query';
+
+export type Alien = {
+  id: number;
+  name: string;
+  colour: string;
+  eyes: number;
+  arms: number;
+  legs: number;
+};
+
+export function useGetAlien({ id }: { id: number }) {
+  return useQuery({
+    queryKey: ['alien', { id }],
+    queryFn: async () => {
+      // This is where you would fetch the user data from an API (e.g. axios.get<Alien>(`/api/alien/${id}`))
+      return {
+        id: 123,
+        name: 'Baglorag Snargleblurf',
+        colour: 'green',
+        eyes: 3,
+        arms: 8,
+        legs: 3,
+      } as Alien;
+    },
+  });
+}
+```
 
 <InfoBox>
   <p>
@@ -58,12 +85,20 @@ This makes sense, but what about the type of data returned by **select**? That d
 
 So, let's create a custom `useGetAlienEyeCount()` hook which uses `select` to slice off just the **eyes** count from the `Alien` data.
 
-<Code
-  code={useGetAlienEyeCount}
-  lang='ts'
-  title='useGetAlienEyeCount.ts'
-  mark={[3, 9]}
-/>
+```ts title="useGetAlienEyeCount.ts" mark={3,9}
+import { useGetAlien, type Alien } from './useGetAlienWithStringSelect';
+
+const selectEyeCount = (alien: Alien) => alien?.eyes ?? 0;
+
+export function useGetAlienEyeCount() {
+  return useGetAlien({
+    id: 123,
+    options: {
+      select: selectEyeCount,
+    },
+  });
+}
+```
 
 This is really neat!
 
@@ -71,21 +106,65 @@ We can re-use the same state and slice off the bits we want without needing to m
 
 And so, we can update our custom hook accordingly.
 
-<Code
-  code={useGetAlienWithStringSelect}
-  lang='ts'
-  title='useGetAlien.ts'
-  ins={[14, 17, 18, 19, 34]}
-/>
+```ts title='useGetAlien.ts' ins={14,17-19,34}
+import { useQuery } from '@tanstack/react-query';
+
+export type Alien = {
+  id: number;
+  name: string;
+  colour: string;
+  eyes: number;
+  arms: number;
+  legs: number;
+};
+
+export function useGetAlien({
+  id,
+  options,
+}: {
+  id: number;
+  options?: {
+    // eslint-disable-next-line no-unused-vars
+    select?: (alien: Alien) => number;
+  };
+}) {
+  return useQuery({
+    queryKey: ['alien', { id }],
+    queryFn: async () => {
+      // This is where you would fetch the user data from an API (e.g. axios.get<Alien>(`/api/alien/${id}`))
+      return {
+        id: 123,
+        name: 'Baglorag Snargleblurf',
+        colour: 'green',
+        eyes: 3,
+        arms: 8,
+        legs: 3,
+      } as Alien;
+    },
+    ...options,
+  });
+}
+```
 
 But there's a problem. We've now told TS that our **select** function returns a `number`, but what if we later add another custom hook with a **select** function that returns the **name** of the Alien? That's a `string` return instead.
 
-<Code
-  code={useGetAlienName}
-  lang='ts'
-  title='useGetAlienName.ts'
-  mark={[9, 10, 11, 12]}
-/>
+```ts title='useGetAlienName.ts' mark={9-12}
+import { useGetAlien, type Alien } from './useGetAlienWithStringSelect';
+
+const selectName = (alien: Alien) => alien?.name;
+
+export function useGetAlienName({ id }: { id: number }) {
+  return useGetAlien({
+    id,
+    options: {
+      //@ts-expect-error: selectName returns a string, but it's expecting a number
+      // Type '(alien: Alien) => string' is not assignable to type '(alien: Alien) => number'.
+      //     Type 'string' is not assignable to type 'number'.ts(2322)
+      select: selectName,
+    },
+  });
+}
+```
 
 We could then start using union types `number | string` but that's going to become messy and less and less accurate, until eventually we might start reaching for the dreaded `any`...
 
@@ -93,13 +172,45 @@ We could then start using union types `number | string` but that's going to beco
 
 The trick is to allow a **Generic** to be passed into the hook, while defaulting to the full data type returned when a **select** is not in use.
 
-<Code
-  code={useGetAlienWithGenerics}
-  lang='ts'
-  title='useGetAlien.ts'
-  collapse='1-11'
-  ins={[12, 18]}
-/>
+```ts title='useGetAlien.ts' collapse={1-11} ins={12,18}
+import { useQuery } from '@tanstack/react-query';
+
+export type Alien = {
+  id: number;
+  name: string;
+  colour: string;
+  eyes: number;
+  arms: number;
+  legs: number;
+};
+
+export function useGetAlien<T = Alien>({
+  id,
+  options,
+}: {
+  id: number;
+  options?: {
+    // eslint-disable-next-line no-unused-vars
+    select?: (alien: Alien) => T;
+  };
+}) {
+  return useQuery({
+    queryKey: ['alien', { id }],
+    queryFn: async () => {
+      // This is where you would fetch the user data from an API (e.g. axios.get<Alien>(`/api/alien/${id}`))
+      return {
+        id: 123,
+        name: 'Baglorag Snargleblurf',
+        colour: 'green',
+        eyes: 3,
+        arms: 8,
+        legs: 3,
+      } as Alien;
+    },
+    ...options,
+  });
+}
+```
 
 This way if we use a **select** function in another custom hook, the return type of the **select** is passed through.
 

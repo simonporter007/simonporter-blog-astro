@@ -10,7 +10,6 @@ isPublished: true
 import PostFooter from '@/components/posts/PostFooter.astro';
 import InfoBox from '@/components/ui/InfoBox.astro';
 import { Code } from 'astro-expressive-code/components';
-import prepush from './pre-push.sh?raw';
 
 Git has [a range of hooks](https://git-scm.com/docs/githooks) that you can use to protect yourself against mistakes, or ensure code standards are kept across your team. I recently had a need to add a `pre-push` hook to save myself some time when pushing up new PR's.
 
@@ -24,7 +23,21 @@ While this does slow down my initial pushes, it's saved me more times than it pr
 
 To get this running in a project, we can create a file in `.git/hooks/pre-push` and make it executable with `chmod +x .git/hooks/pre-push`:
 
-<Code code={prepush} lang='sh' title='pre-push.sh' />
+```sh title="pre-push.sh"
+#!/bin/zsh
+
+cmd="yarn run typecheck" # replace with your typechecking/linting command
+
+echo "running typecheck before push..."
+eval $cmd
+result=$?
+if ! eval "$cmd"; then
+echo "Failed typecheck! Fix before pushing or force push: \`git push --no-verify\`" >&2
+exit 1
+fi
+
+exit 0
+```
 
 ### VSCode integration
 

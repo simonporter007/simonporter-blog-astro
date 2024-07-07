@@ -1,0 +1,402 @@
+---
+title: 'WooCommerce ddevelopment with ddev'
+publishedAt: 2024-07-07
+description: "Excited about my new role at Kestrel Commerce, I've been exploring ddev for WordPress development and can't wait to share my findings."
+slug: 'woocommerce-ddevelopment-with-ddev'
+tags: ['wordpress', 'woocommerce']
+isPublished: true
+---
+
+import { Code } from 'astro-expressive-code/components';
+import PostFooter from '@/components/posts/PostFooter.astro';
+import InfoBox from '@/components/ui/InfoBox.astro';
+
+Buckle up folks, cos this is gonna be a bit of a long one! I'm very excited to have started a new role with Kestrel Commerce, back into the [world of WordPress again](https://kestrelwp.com). And I'm also excited to playing with new toys! Setting up development environments isn't everyone's favourite pastime but I've recently stumbled on [ddev](https://github.com/ddev/ddev) and I really enjoyed getting it up and running and wanted to share.
+
+## The Dominance of WordPress
+
+Love it or loathe it, WordPress powers _**around 43% of the internet**_[^w3tech]! Chances are, you've stumbled across numerous WordPress sites without even knowing it. While some might think of WordPress as a bit old school, its ecosystem of themes and plugins makes it incredibly versatile and powerful.
+
+Having worked in a support engineering role for WooCommerce plugins, I'm no stranger to WordPress or WooCommerce. One persistent issue I faced was setting up a solid local development environment. Even in support, debugging plugins while keeping the site performant was a tough challenge. So, in my new role, I was eager to explore fresh options in the WordPress realm.
+
+<p>
+  <a class:list='text-sm' href='#rounding-up'>
+    Skip to the end if you just want the config! ✨
+  </a>
+</p>
+
+## To dock or not?
+
+Performance has always been a tricky issue. The PHP/WordPress space offers a dizzying array of choices: Valet, Vagrant, Varying Vagrant Vagrants, Local by Flywheel, Lando, LAMP - you name it! I tried many of these options, but none quite hit the mark.
+
+Some solutions attempt to sidestep Docker's performance hit[^docker_perf] (especially on Mac and Windows) by installing environment requirements globally. For example, a typical LAMP setup installs PHP and Apache system-wide. This works if you're managing just one site, but in technical support or engineering, the ability to quickly switch versions and configurations to match a merchant's system or test different setups is invaluable. This is where Docker's isolated nature shines, allowing multiple configurations to run simultaneously on the same system.
+
+Previously, I settled on [Lando](https://lando.dev/) for my development environment. It struck a good balance between Docker's performance and system control - better than Local by Flywheel. If more control isn't your main concern, Local by Flywheel is an excellent choice, making it ridiculously easy to get a local WP site running in minutes.
+
+So why switch to `ddev`?
+
+## Recipes and complexities
+
+Lando was solid, but getting the perfect setup was a chore. A recipe[^recipe] - the main config file for Lando - configures everything needed to run your site, from routing to services. It's a bit like a Swiss army knife, it can do a lot of things, but it's not always clear how to do them. I often had to revisit the documentation, which is fine if you're using it daily to build muscle memory, but not so great if you're frequently relearning things.
+
+This shouldn't be a surprise because they do describe themselves as being an abstraction layer on top of the complexities of docker/docker compose. It just sometimes felt like it was _too_ magical, or too different from the underlying docker compose to be useful. As I added more services to my recipe, it became more and more complex and harder to manage.
+
+Don't get me wrong though, I would still recommend Lando as a development tool for WordPress, especially if you're not interested in the complexities of docker. I would still give it another look in the future if ddev doesn't pan out.
+
+## Enter ddev
+
+So I decided to give ddev a shot. it doesn't shy away from Docker's complexities but provides the necessary tooling to get you up and running quickly. It's similar to Lando in offering a CLI tool to manage Docker containers, but more transparent and explicit about its operations, much like Docker Compose.
+
+> DDEV is an open-source tool for running local web development environments for PHP, Python and Node.js, ready in minutes. Its powerful, flexible per-project environment configurations can be extended, version controlled, and shared. DDEV allows development teams to adopt a consistent Docker workflow without the complexities of bespoke configuration.
+
+I began by using my Lando recipe as a foundation, gradually building out the configuration with the ddev docs at my side. Let's walk through the setup I crafted, step by step.
+
+First things first, [go get ddev installed](https://ddev.com/get-started/) if you want to play along. There's no point repeating the docs here, they're pretty good! Once you've got that installed, and you've created a new project, we can start building out your `ddev.yaml` file.
+
+### The basics
+
+Because we're building a WordPress ddev container, first we need to download and extract the latest version of WordPress into our project. Easily done with the following commands:
+
+```sh
+wget http://wordpress.org/latest.tar.gz -O - | tar -xzvf -
+mv wordpress/* ./
+rm -rf wordpress
+```
+
+<InfoBox>
+  <p>
+    Feel free to skip moving the wordpress directory contents into the root of
+    your project if you want to keep it separate. I like to keep it all in the
+    root for simplicity. If you do this, you'll need to adjust the paths in the
+    `ddev.yaml` file.
+  </p>
+</InfoBox>
+
+Hopefully you've got your ddev project setup so it's generated the config files, if not get that done quickly with `ddev config`.
+
+Now we can start building out the `ddev.yaml` file inside of your `.ddev` directory. First we just want to set up the basics of the environment, I love how simpler this feels in ddev compared to Lando.
+
+```yaml title="config.yaml"
+name: kestrel
+type: wordpress
+docroot: ''
+php_version: '7.4' # PHP version to use, "5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"
+webserver_type: nginx-fpm # nginx-fpm, apache-fpm, or nginx-gunicorn
+xdebug_enabled: false # "ddev xdebug" to enable Xdebug and "ddev xdebug off" to disable it work better,
+additional_hostnames: []
+additional_fqdns: []
+database:
+  type: mariadb # type: <dbtype> # mysql, mariadb, postgres
+  version: '10.11' # database version, like "10.11" or "8.0"
+use_dns_when_possible: true
+composer_version: '2'
+web_environment: []
+corepack_enable: false
+```
+
+Most of these options are self explanatory, but the interesting config here is the `type` property. ddev [supports a bunch of CMS's](https://ddev.readthedocs.io/en/latest/users/quickstart/#cms-quickstarts) out of the box, including WordPress, Drupal, and Magento. This is a nice touch, as it will automatically set up the environment for you. This includes the WP-CLI which you can lean into for a really custom WP set up using ddev [hooks](https://ddev.readthedocs.io/en/stable/users/configuration/hooks/), which we'll look at next. You can also set this to `php` if you're not using a CMS, and it will set up a basic PHP environment for you instead.
+
+Nothing groundbreaking here, Lando [offers something similar](https://docs.lando.dev/plugins/wordpress/config.html) too, but I do like how simple this is to get up and running.
+
+### Tweaking the environment
+
+So far if you ran `ddev start` you'd have a fully functional WordPress site and should be able to reach the installation page to complete installation manually. But we can do better than that. Let's add some hooks to our environment to really kick things off!
+
+```yaml title="config.yaml" collapse={1-15} ins={16-37}
+name: kestrel
+type: wordpress
+docroot: ''
+php_version: '7.4' # PHP version to use, "5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"
+webserver_type: nginx-fpm # nginx-fpm, apache-fpm, or nginx-gunicorn
+xdebug_enabled: false # "ddev xdebug" to enable Xdebug and "ddev xdebug off" to disable it work better,
+additional_hostnames: []
+additional_fqdns: []
+database:
+  type: mariadb # type: <dbtype> # mysql, mariadb, postgres
+  version: '10.11' # database version, like "10.11" or "8.0"
+use_dns_when_possible: true
+composer_version: '2'
+web_environment: []
+corepack_enable: false
+hooks:
+  post-start:
+    # Set up the config values for our WP instance
+    - exec: wp config set SCRIPT_DEBUG true --raw
+    - exec: wp config set WP_DEBUG true --raw
+    - exec: wp config set WP_DEBUG_DISPLAY true --raw
+    - exec: wp config set WP_DEBUG_LOG true --raw
+    # Update core, language files, and themes
+    - exec: wp core update --path=/var/www/html
+    - exec: wp language theme update --all --path=/var/www/html
+    # Install any necessary plugins and themes from the WP directory
+    - exec: wp theme install storefront --quiet --path=/var/www/html
+    - exec: wp plugin install woocommerce --activate --quiet --path=/var/www/html
+    - exec: wp plugin install code-snippets --activate --quiet --path=/var/www/html
+    - exec: wp plugin install transients-manager --activate --quiet --path=/var/www/html
+    - exec: wp plugin install wp-console --activate --quiet --path=/var/www/html
+    - exec: wp plugin install woocommerce-store-toolkit --activate --quiet --path=/var/www/html
+    - exec: wp plugin install log-http-requests --activate --quiet --path=/var/www/html
+    - exec: wp plugin install query-monitor --activate --quiet --path=/var/www/html
+    - exec: wp plugin install user-switching --activate --quiet --path=/var/www/html
+    - exec: wp plugin install wp-crontrol --activate --quiet --path=/var/www/html
+```
+
+Now we're getting somewhere! We've added a `post-start` hook to our environment. This will run each time after running `ddev start` to make sure the environment is always up to date, and the right plugins installed and linked.
+
+Specifically, we're:
+
+- setting some WP config variables via WP-CLI to enable easier debugging
+- updating WP to the latest version, as well as updating our themes and language packs
+- installing some choice themes and plugins to help with development (_I've included some of my favorites here, but feel free to use your own!_)
+
+So with just 36 lines of config, we have a fully functional WordPress environment with WooCommerce installed, and some choice plugins and themes to help with development. It will also keep the main parts up to date as we use `ddev start` without any extra hassle. Seriously cool stuff!
+
+### Advanced Setup: More services
+
+But, but, but. What about xdebug? What about mailhog? What about phpmyadmin? ddev has you covered there too. `ddev` comes built in with [a fair chunk of tooling](https://ddev.readthedocs.io/en/stable/users/usage/developer-tools/). Right out of the box you get wp-cli as we already mentioned, but you also get `composer`, and `node`/`yarn` and even `nvm`! That's a real nice touch, being able to switch node versions if you need to.
+
+It also includes `mailpit` [for email capture](https://ddev.readthedocs.io/en/stable/users/usage/developer-tools/#email-capture-and-review-mailpit), which would be the equivalent to Lando's `mailhog` service. This is built in, and "just works". All's you need to do is `ddev mailpit` to launch the browser window.
+
+<InfoBox>
+  <p>
+    <strong>Quick note about the ddev commands!</strong>
+  </p>
+  <p>
+    It's such a tiny little thing, but I love it. A lot of the `ddev` commands
+    will launch the browser window for you, so you don't need to `lando info` to
+    find the URL and then either copy/paste or cmd click the link to get it
+    launched. It's a tiny thing, but it's so nice to have!
+  </p>
+  <p>
+    For WordPress for instance, you can run `ddev launch` to reach your blog
+    home page, or you can use `ddev launch wp-admin` to reach the backend
+    wp-admin. Neat!
+  </p>
+</InfoBox>
+
+But what about `xdebug`? You can enable xdebug with a simple `ddev xdebug on` command. This will enable xdebug for your site, and you can use your favorite IDE to connect to it. They [have written guides](https://ddev.readthedocs.io/en/stable/users/debugging-profiling/step-debugging/) for the popular IDE's (PHPStorm and VSCode).
+
+Setting up xdebug can be a nightmare, but when it works, it's a game-changer for debugging plugins. If you haven't tried it yet, it's definitely worth the effort.
+
+What I loved about ddev is that they provide you with the `tasks.json` file for VSCode, as well as a `launch.json` file, so you can just drop it into your .vscode directory and you've got a great little debug task that turns on xdebug when you start the debugger, and turns it off when it stops. Again, it's a tiny thing, but it's so nice to have! Why leave it running hampering performance if you're not using it? And why manage that manually when you can be lazy :sunglasses:
+
+### Advanced Setup: Even more services!
+
+As if all that wasn't enough, ddev also has [some add-ons](https://ddev.readthedocs.io/en/stable/users/extend/additional-services/) you can install which add additional services to your ddev container. What I find neat about this is that ddev really leans into docker and docker compose, so these services are "just" additional docker compose services that you can install and get running with your app with very little effort.
+
+```sh
+ddev get ddev/ddev-redis-7
+ddev restart
+```
+
+For me, I decided to add the redis plugin. Which is easily done through the `ddev` command: `ddev get ddev/ddev-redis-7`. This downloads the docker addon to your project, and as soon as you `ddev restart` it'll be running too!
+
+In order to use it with our WordPress instance though, we need to tell WordPress the credentials to use, and install the [redis object cache plugin](https://en-gb.wordpress.org/plugins/redis-cache/). The simplest way I found to do this was to use the WP-CLI, because each time you run `ddev start` the wp-config file is going to be automatically generated, and I couldn't see an easy way to add custom PHP constants/overrides to this.
+
+WP-CLI is simple enough though, we've already got the template structure to do it!
+
+```yaml title="config.yaml" collapse={1-15} ins={19-20,39}
+name: kestrel
+type: wordpress
+docroot: ''
+php_version: '7.4' # PHP version to use, "5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"
+webserver_type: nginx-fpm # nginx-fpm, apache-fpm, or nginx-gunicorn
+xdebug_enabled: false # "ddev xdebug" to enable Xdebug and "ddev xdebug off" to disable it work better,
+additional_hostnames: []
+additional_fqdns: []
+database:
+  type: mariadb # type: <dbtype> # mysql, mariadb, postgres
+  version: '10.11' # database version, like "10.11" or "8.0"
+use_dns_when_possible: true
+composer_version: '2'
+web_environment: []
+corepack_enable: false
+hooks:
+  post-start:
+    # Set up the config values for our WP instance
+    - exec: wp config set WP_REDIS_HOST 'redis'
+    - exec: wp config set WP_REDIS_PASSWORD "['redis', 'redis']" --raw
+    - exec: wp config set SCRIPT_DEBUG true --raw
+    - exec: wp config set WP_DEBUG true --raw
+    - exec: wp config set WP_DEBUG_DISPLAY true --raw
+    - exec: wp config set WP_DEBUG_LOG true --raw
+    # Update core, language files, and themes
+    - exec: wp core update --path=/var/www/html
+    - exec: wp language theme update --all --path=/var/www/html
+    # Install any necessary plugins and themes from the WP directory
+    - exec: wp theme install storefront --quiet --path=/var/www/html
+    - exec: wp plugin install woocommerce --activate --quiet --path=/var/www/html
+    - exec: wp plugin install code-snippets --activate --quiet --path=/var/www/html
+    - exec: wp plugin install transients-manager --activate --quiet --path=/var/www/html
+    - exec: wp plugin install wp-console --activate --quiet --path=/var/www/html
+    - exec: wp plugin install woocommerce-store-toolkit --activate --quiet --path=/var/www/html
+    - exec: wp plugin install log-http-requests --activate --quiet --path=/var/www/html
+    - exec: wp plugin install query-monitor --activate --quiet --path=/var/www/html
+    - exec: wp plugin install user-switching --activate --quiet --path=/var/www/html
+    - exec: wp plugin install wp-crontrol --activate --quiet --path=/var/www/html
+    - exec: wp plugin install redis-cache --activate --quiet --path=/var/www/html
+```
+
+Now each time we start our app, we're making sure that the redis add-on container is running, WordPress is configured to use it, and the redis-cache plugin is being installed and activated.
+
+<InfoBox type='note'>
+  <p>
+    <strong>Installing phpmyadmin?</strong>
+  </p>
+  <p>
+    Do you usually use phpMyAdmin or adminer? You can install these services in
+    the exact same way as we did redis here too. Why don't you give it a go?
+  </p>
+</InfoBox>
+
+### Advanced Setup: Finishing touches
+
+If you've been following along so far, you should have a pretty good fleshed out development environment, and as long as your system can handle it, you can replicate this and tweak the settings to create more and more sites as needed. Perfect!
+
+One thing I can struggle with is getting xdebug working with the plugins from source. At Kestrel, we have a portfolio of [over 30 plugins](https://kestrelwp.com/products/), and running these from their source code repo let's me tinker with the code, switch branches for pre-release QA, and all the usual local development goodies.
+
+Normally this means my actual workspace with the plugin repos are in a different directory to my local wordpress site. If you've paid attention so far though, you'll have seen that when we added redis, it just added a new docker compose service.
+
+> Anyone can create their own services with a .ddev/docker-compose.\*.yaml file, and a growing number of popular services are supported and tested, and can be installed using the ddev get command.
+
+So if we need to share more files with our app, we can use standard docker compose volume mounting! No magic here. Create a _docker-compose.mount.yaml_ file and add the volumes you want to share with your container, together with their mount points.
+
+```yaml title="docker-compose.mount.yaml"
+services:
+  web:
+    volumes:
+      - '$HOME/workspace:<path_to_home>/workspace'
+```
+
+Again, this is all just standard docker/docker compose behavior, so no custom recipe or custom config to hunt out in the docs and learn - whatever you can do with docker you can integrate here too. This compose file mounts our _workspace_ directory on our host machine into the container using the path specified.
+
+You might be wondering why I use the same home path inside the container as it exists outside on the host PC?
+
+This cycles around to our xdebug requirement. Now when we start ddev, we can tell it to symlink all of our plugins from the repository instead (we can switch over woocommerce too if we want an easy way to switch WooCommerce versions from source!):
+
+```yaml title="config.yaml" collapse={1-15,35-41} ins={18-20} del={33}
+name: kestrel
+type: wordpress
+docroot: ''
+php_version: '7.4' # PHP version to use, "5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"
+webserver_type: nginx-fpm # nginx-fpm, apache-fpm, or nginx-gunicorn
+xdebug_enabled: false # "ddev xdebug" to enable Xdebug and "ddev xdebug off" to disable it work better,
+additional_hostnames: []
+additional_fqdns: []
+database:
+  type: mariadb # type: <dbtype> # mysql, mariadb, postgres
+  version: '10.11' # database version, like "10.11" or "8.0"
+use_dns_when_possible: true
+composer_version: '2'
+web_environment: []
+corepack_enable: false
+hooks:
+  post-start:
+    # Install our plugins by symlink
+    - exec: ln -snf <path_to_home>/workspace/woocommerce/plugins/woocommerce /var/www/html/wp-content/plugins/woocommerce
+    - exec: cd <path_to_home>/workspace/kestrel; for i in `ls -d */`; do ln -snf <path_to_home>/workspace/kestrel/${i%?} /var/www/html/wp-content/plugins/${i%?};done
+    # Set up the config values for our WP instance
+    - exec: wp config set WP_REDIS_HOST 'redis'
+    - exec: wp config set WP_REDIS_PASSWORD "['redis', 'redis']" --raw
+    - exec: wp config set SCRIPT_DEBUG true --raw
+    - exec: wp config set WP_DEBUG true --raw
+    - exec: wp config set WP_DEBUG_DISPLAY true --raw
+    - exec: wp config set WP_DEBUG_LOG true --raw
+    # Update core, language files, and themes
+    - exec: wp core update --path=/var/www/html
+    - exec: wp language theme update --all --path=/var/www/html
+    # Install any necessary plugins and themes from the WP directory
+    - exec: wp theme install storefront --quiet --path=/var/www/html
+    - exec: wp plugin install woocommerce --activate --quiet --path=/var/www/html
+    - exec: wp plugin install code-snippets --activate --quiet --path=/var/www/html
+    - exec: wp plugin install transients-manager --activate --quiet --path=/var/www/html
+    - exec: wp plugin install wp-console --activate --quiet --path=/var/www/html
+    - exec: wp plugin install woocommerce-store-toolkit --activate --quiet --path=/var/www/html
+    - exec: wp plugin install log-http-requests --activate --quiet --path=/var/www/html
+    - exec: wp plugin install query-monitor --activate --quiet --path=/var/www/html
+    - exec: wp plugin install user-switching --activate --quiet --path=/var/www/html
+    - exec: wp plugin install wp-crontrol --activate --quiet --path=/var/www/html
+    - exec: wp plugin install redis-cache --activate --quiet --path=/var/www/html
+```
+
+This way when xdebug tries to trigger a breakpoint on the path inside the container, it matches the actual path on the host machine. In this case, my workspace (in my home folder) is the same path in the container as it is in host, so I don't need to worry about any specific xdebug path mapping _**AND**_ the symlink gets loaded inside vscode when opening my ddev project directory _**AND**_ that works in vscode on the host to view the symlinked repo files!
+
+Not to mention, if we were to build or acquire any plugins in the future, they get automatically linked to my development site by restarting the ddev environment.
+
+This is the easiest method I've found for being able to xdebug symlinked plugins inside a docker container. `ddev` makes it easy to enable xdebug itself via the provided json snippets, a single built in cli command, and symlinked repos for the main WordPress site. Wonderful.
+
+## Rounding up
+
+To recap, we've built out a WordPress site, running WooCommerce and any number of plugins symlinked to their repositories which allows us to switch versions on the fly via git.
+
+We have automatic updating of WordPress, themes, and development plugins - and we have xdebug working for all of this too. Redis is installed to try and keep things snappy, as well as mail capture, and phpMyAdmin or Adminer.
+
+```yaml title=".ddev/config.yaml"
+name: kestrel
+type: wordpress
+docroot: ''
+php_version: '7.4' # PHP version to use, "5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"
+webserver_type: nginx-fpm # nginx-fpm, apache-fpm, or nginx-gunicorn
+xdebug_enabled: false # "ddev xdebug" to enable Xdebug and "ddev xdebug off" to disable it work better,
+additional_hostnames: []
+additional_fqdns: []
+database:
+  type: mariadb # type: <dbtype> # mysql, mariadb, postgres
+  version: '10.11' # database version, like "10.11" or "8.0"
+use_dns_when_possible: true
+composer_version: '2'
+web_environment: []
+corepack_enable: false
+hooks:
+  post-start:
+    # Install our plugins by symlink
+    - exec: ln -snf <path_to_home>/workspace/woocommerce/plugins/woocommerce /var/www/html/wp-content/plugins/woocommerce
+    - exec: cd <path_to_home>/workspace/kestrel; for i in `ls -d */`; do ln -snf <path_to_home>/workspace/kestrel/${i%?} /var/www/html/wp-content/plugins/${i%?};done
+    # Set up the config values for our WP instance
+    - exec: wp config set WP_REDIS_HOST 'redis'
+    - exec: wp config set WP_REDIS_PASSWORD "['redis', 'redis']" --raw
+    - exec: wp config set SCRIPT_DEBUG true --raw
+    - exec: wp config set WP_DEBUG true --raw
+    - exec: wp config set WP_DEBUG_DISPLAY true --raw
+    - exec: wp config set WP_DEBUG_LOG true --raw
+    # Update core, language files, and themes
+    - exec: wp core update --path=/var/www/html
+    - exec: wp language theme update --all --path=/var/www/html
+    # Install any necessary plugins and themes from the WP directory
+    - exec: wp theme install storefront --quiet --path=/var/www/html
+    - exec: wp plugin install woocommerce --activate --quiet --path=/var/www/html
+    - exec: wp plugin install code-snippets --activate --quiet --path=/var/www/html
+    - exec: wp plugin install transients-manager --activate --quiet --path=/var/www/html
+    - exec: wp plugin install wp-console --activate --quiet --path=/var/www/html
+    - exec: wp plugin install woocommerce-store-toolkit --activate --quiet --path=/var/www/html
+    - exec: wp plugin install log-http-requests --activate --quiet --path=/var/www/html
+    - exec: wp plugin install query-monitor --activate --quiet --path=/var/www/html
+    - exec: wp plugin install user-switching --activate --quiet --path=/var/www/html
+    - exec: wp plugin install wp-crontrol --activate --quiet --path=/var/www/html
+    - exec: wp plugin install redis-cache --activate --quiet --path=/var/www/html
+```
+
+```yaml title=".ddev/docker-compose.mount.yaml"
+services:
+  web:
+    volumes:
+      - '$HOME/workspace:<path_to_home>/workspace'
+```
+
+ddev makes it super simple to get up and running with a WordPress site, as well as including the tools you need to have a useful and performant developer environment. Symlinking repositories for WordPress plugins is easy, and works with xdebug, and adding additional services is made simple by following the standard docker and docker compose format.
+
+If you don't like any of the defaults, `ddev` doesn't hide it away behind magic, the generated docker compose files are there for you to tinker with or learn from, this includes the traefik proxy, php and apache.
+
+While this was all possible in Lando, I didn't have as smooth a time as I did running ddev. I love that ddev aims to solve the same problem, but doesn't try and _hide_ the magic of docker and docker compose services, instead it automates it for you, and if you need to get into the internals and change up the configuration - it's right there in standard docker format.
+
+I'm going to keep `ddev` for a while I think!
+
+<PostFooter />
+
+---
+
+[^w3tech]: As of June 2024, WordPress powers 43% of the internet. More than 474 million sites! [source](https://w3techs.com/technologies/details/cm-wordpress)
+
+[^docker_perf]: Docker _can_ be slow on different platforms, it was noticeable when I ran it on my M1 Mac. [source](https://www.google.com/search?q=docker+bad+performance&source=desktop)
+
+[^recipe]: Lando's recipes is the ddev `config.yaml` equivalent. [source](https://docs.lando.dev/core/v3/recipes.html)

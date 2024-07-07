@@ -1,7 +1,6 @@
 ---
 import { type CollectionEntry, getCollection } from 'astro:content';
 import Layout from '@/components/layout/Layout.astro';
-import formatDate from '@/utils/formatDate';
 import PostCard from '@/components/posts/PostCard.astro';
 
 export async function getStaticPaths() {
@@ -17,7 +16,6 @@ export async function getStaticPaths() {
   }
 
   return tags.map((tag) => {
-    console.log({ tag });
     return {
       params: { tag },
       props: {
